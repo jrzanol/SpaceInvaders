@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+/3rdparty/assimp
+/3rdparty/glew-2.2.0
+/3rdparty/glfw-3.3.8.bin.WIN32
+/3rdparty/glm
+/3rdparty/imgui
+/3rdparty/stb
+/bin/*.pdb
+/src/out
