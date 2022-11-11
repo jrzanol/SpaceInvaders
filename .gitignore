@@ -30,9 +30,5 @@
 *.exe
 *.out
 *.app
-/3rdparty/assimp
-/3rdparty/glm
-/3rdparty/imgui
-/3rdparty/stb
 /bin/*.pdb
 /src/out
