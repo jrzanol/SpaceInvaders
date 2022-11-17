@@ -200,10 +200,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Editor\CAnimation.cpp" />
     <ClCompile Include="Editor\CLight.cpp" />
     <ClCompile Include="Editor\CPickItem.cpp" />
     <ClCompile Include="Interface\CCamera.cpp" />
+    <ClCompile Include="Interface\CGame.cpp" />
     <ClCompile Include="Interface\CWindow.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Model\CMesh.cpp" />
@@ -219,10 +219,10 @@
     <ClCompile Include="Util\CUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Editor\CAnimation.h" />
     <ClInclude Include="Editor\CLight.h" />
     <ClInclude Include="Editor\CPickItem.h" />
     <ClInclude Include="Interface\CCamera.h" />
+    <ClInclude Include="Interface\CGame.h" />
     <ClInclude Include="Interface\CWindow.h" />
     <ClInclude Include="Model\CMesh.h" />
     <ClInclude Include="Model\CModel.h" />

@@ -241,8 +241,10 @@ bool CPickItem::IntersectSphere(stIntersect& out, bool onlySelected)
     glm::vec2 fC(xpos, ypos);
     glm::vec2 ndc = ((glm::vec2(fC.x / static_cast<float>(g_WindowMaxX), 1.0 - fC.y / static_cast<float>(g_WindowMaxY)) * 2.0f) - 1.0f);
 
-    for (CModel* it : CWindow::GetModels())
+    for (unsigned int Id = 0; Id < CWindow::GetModelCount(); ++Id)
     {
+        CModel* it = CWindow::GetModel(Id);
+
         if (onlySelected)
             it = CModel::g_SelectedModel;
         else if (it == CModel::g_SelectedModel)
@@ -302,8 +304,10 @@ bool CPickItem::IntersectSurface(stIntersect& out, bool onlySelected)
     glm::vec3 outIntersectionPoint;
     int minDistOfSurface = 9999999;
 
-    for (CModel* it : CWindow::GetModels())
+    for (unsigned int Id = 0; Id < CWindow::GetModelCount(); ++Id)
     {
+        CModel* it = CWindow::GetModel(Id);
+
         if (onlySelected)
             it = CModel::g_SelectedModel;
         else if (it == CModel::g_SelectedModel)

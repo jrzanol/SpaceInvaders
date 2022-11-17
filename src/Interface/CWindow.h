@@ -7,6 +7,7 @@
 #include "CCamera.h"
 #include "CModel.h"
 #include "CLight.h"
+#include "CGame.h"
 
 class CWindow
 {
@@ -19,22 +20,26 @@ public:
 	bool Render();
 
 	static const glm::mat4& GetVP();
-	static const std::list<CModel*>& GetModels();
+
+	static CModel* GetModel(unsigned int);
+	static unsigned int GetModelCount();
+
+	static const unsigned int MAX_MODEL = 64;
+	static CModel* CreateModel(int, const char*);
 
 private:
-	CLight m_Light[3];
-	CCamera m_Camera[3];
+	CGame m_Game;
+	CLight m_Light;
+	CCamera m_Camera;
 	
 	GLuint m_ProgramId;
-	GLuint m_PickingProgramId;
 
 	GLuint CompileShader(const char*, GLenum);
 	GLuint LinkProgram(GLuint, GLuint);
 
 	static glm::mat4 m_VP;
-	static std::list<CModel*> m_DrawModel;
 
-	static void CreateModel(int, const char*);
-	static void SaveModel();
+	static unsigned int m_ModelCounter;
+	static CModel* m_DrawModel[MAX_MODEL];
 };
 

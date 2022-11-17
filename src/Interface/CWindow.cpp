@@ -5,13 +5,14 @@
 #include "CWindow.h"
 
 glm::mat4 CWindow::m_VP;
-std::list<CModel*> CWindow::m_DrawModel;
+
+unsigned int CWindow::m_ModelCounter = 0;
+CModel* CWindow::m_DrawModel[MAX_MODEL];
 
 CWindow::CWindow()
 {
     g_Window = NULL;
     m_ProgramId = 0;
-    m_PickingProgramId = 0;
 }
 
 CWindow::~CWindow()
@@ -19,7 +20,9 @@ CWindow::~CWindow()
 }
 
 const glm::mat4& CWindow::GetVP() { return m_VP; }
-const std::list<CModel*>& CWindow::GetModels() { return m_DrawModel; }
+
+CModel* CWindow::GetModel(unsigned int Id) { return m_DrawModel[Id]; }
+unsigned int CWindow::GetModelCount() { return m_ModelCounter; }
 
 bool CWindow::Initialize()
 {
@@ -85,8 +88,7 @@ bool CWindow::Initialize()
 
     std::cout << "Carregando os modelos...\n";
 
-    // Load Models.
-    CreateModel(0, "Model/main.obj");
+    m_Game.Initialize();
 
     // Configure the Lines.
     glLineWidth(2.f);
@@ -115,19 +117,18 @@ bool CWindow::Render()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Set Transforms.
-    glm::mat4 projection = glm::perspective(glm::radians(m_Camera[CCamera::m_CameraId].m_Zoom), (float)g_WindowMaxY / (float)g_WindowMaxX, 0.1f, 100.0f);
-    glm::mat4 view = m_Camera[CCamera::m_CameraId].GetViewMatrix();
+    glm::mat4 projection = glm::perspective(glm::radians(m_Camera.m_Zoom), (float)g_WindowMaxY / (float)g_WindowMaxX, 0.1f, 100.0f);
+    glm::mat4 view = m_Camera.GetViewMatrix();
 
     m_VP = (projection * view);
     glUniformMatrix4fv(glGetUniformLocation(m_ProgramId, "u_vp"), 1, GL_FALSE, glm::value_ptr(m_VP));
 
     // Draw Lights.
-    for (const auto& it : m_Light)
-        it.Draw(m_ProgramId);
+    m_Light.Draw(m_ProgramId);
     
     // Draw objects.
-    for (const auto& it : m_DrawModel)
-        it->Draw(m_ProgramId, m_VP);
+    for (unsigned int i = 0; i < m_ModelCounter; ++i)
+        m_DrawModel[i]->Draw(m_ProgramId, m_VP);
 
     // Start the Dear ImGui frame.
     ImGui_ImplOpenGL3_NewFrame();
@@ -142,128 +143,13 @@ bool CWindow::Render()
         ImGui::RadioButton("Remover Vertices", &CUtil::m_EditorType, 2);
         ImGui::RadioButton("Mover Objetos", &CUtil::m_EditorType, 3);
         ImGui::RadioButton("Criar Curva", &CUtil::m_EditorType, 4);
+        ImGui::RadioButton("Visualizar", &CUtil::m_EditorType, 5);
         if (ImGui::Button("Criar Modelo #1"))
             CreateModel(0, "Model/main.obj");
         if (ImGui::Button("Criar Modelo #2"))
             CreateModel(1, "Model2/main.obj");
         if (ImGui::Button("Criar Modelo #3"))
             CreateModel(2, "Model3/main.obj");
-        if (CModel::g_SelectedModel->GetAnimation())
-        {
-            if (ImGui::Button("Pausar Animacao"))
-                CModel::g_SelectedModel->SetAnimation(false);
-        }
-        else
-        {
-            if (ImGui::Button("Ativar Animacao"))
-                CModel::g_SelectedModel->SetAnimation();
-        }
-        static bool s_AllAniAtived = false;
-        if (s_AllAniAtived)
-        {
-            if (ImGui::Button("Desativar Animacoes"))
-            {
-                for (auto& it : CWindow::GetModels())
-                    it->SetAnimation(false);
-
-                s_AllAniAtived = false;
-            }
-        }
-        else
-        {
-            if (ImGui::Button("Ativar todas Animacoes"))
-            {
-                for (auto& it : CWindow::GetModels())
-                    it->SetAnimation();
-
-                s_AllAniAtived = true;
-            }
-        }
-        ImGui::Separator();
-        ImGui::Text("Textura:");
-        ImGui::RadioButton("Textura Padrao", &CModel::g_SelectedModel->m_SelectedTexture, 0);
-        ImGui::RadioButton("Textura #02", &CModel::g_SelectedModel->m_SelectedTexture, 1);
-        ImGui::RadioButton("Textura #03", &CModel::g_SelectedModel->m_SelectedTexture, 2);
-        ImGui::Text("Mover a Textura:");
-        ImGui::SliderFloat("+", &CModel::g_SelectedModel->m_TextCoord, 0.f, 2.f);
-        ImGui::Separator();
-        ImGui::Text("Camera:");
-        ImGui::RadioButton("Camera Padrao", &CCamera::m_CameraId, 0);
-        ImGui::RadioButton("Camera #02", &CCamera::m_CameraId, 1);
-        ImGui::RadioButton("Camera #03", &CCamera::m_CameraId, 2);
-        static bool s_AllCamAniAtived = false;
-        if (s_AllCamAniAtived)
-        {
-            if (ImGui::Button("Desativar Animacoes [Cam]"))
-            {
-                for (auto& it : m_Camera)
-                    it.SetAnimation(false);
-
-                s_AllCamAniAtived = false;
-            }
-        }
-        else
-        {
-            if (ImGui::Button("Ativar Animacoes [Cam]"))
-            {
-                for (auto& it : m_Camera)
-                    it.SetAnimation();
-
-                s_AllCamAniAtived = true;
-            }
-        }
-        ImGui::Separator();
-        ImGui::Text("Luz:");
-        static bool s_AllLightAniAtived = false;
-        if (s_AllLightAniAtived)
-        {
-            if (ImGui::Button("Desativar Animacoes [Light]"))
-            {
-                for (auto& it : m_Light)
-                    it.SetAnimation(false);
-
-                s_AllLightAniAtived = false;
-            }
-        }
-        else
-        {
-            if (ImGui::Button("Ativar Animacoes [Light]"))
-            {
-                for (auto& it : m_Light)
-                    it.SetAnimation();
-
-                s_AllLightAniAtived = true;
-            }
-        }
-        ImGui::Separator();
-        ImGui::Text("Salvar:");
-        if (ImGui::Button("Salvar Modelo"))
-        {
-            CWindow::SaveModel();
-
-            ImGui::SameLine();
-            ImGui::Text("Salvo!");
-        }
-        if (ImGui::Button("Salvar Cena"))
-        {
-            FILE* out = fopen("Scene.txt", "wt");
-            if (out)
-            {
-                for (const auto& it : m_Camera)
-                    fprintf(out, "%s\n", it.ToString());
-
-                for (const auto& it : m_Light)
-                    fprintf(out, "%s\n", it.ToString());
-
-                for (const auto& it : m_DrawModel)
-                    fprintf(out, "%s\n", it->ToString());
-
-                fclose(out);
-            }
-
-            ImGui::SameLine();
-            ImGui::Text("Salvo!");
-        }
     ImGui::End();
 
     // Rendering the ImGui.
@@ -283,68 +169,29 @@ bool CWindow::Render()
     return glfwWindowShouldClose(g_Window);
 }
 
-void CWindow::CreateModel(int type, const char* fileModel)
+CModel* CWindow::CreateModel(int type, const char* fileModel)
 {
-    static int s_ModelCounter = 0;
-
     CModel* m = CModel::LoadModel(fileModel);
     glm::vec3* pos = m->GetPosition();
 
-    int xmul = (s_ModelCounter / 7);
-    int zmul = (s_ModelCounter % 7);
+    int xmul = (m_ModelCounter / 7);
+    int zmul = (m_ModelCounter % 7);
 
     *pos = glm::vec3(5.f * xmul, 0.f, -5.f * zmul);
 
     if (type == 1)
     {
         pos->y = -1.f;
-        m->m_Scale = glm::vec3(5.f, 5.f, 5.f);
+        m->m_Scale = glm::vec3(1.f, 1.f, 1.f);
     }
     else if (type == 2)
     {
         pos->y = 0.75f;
-        m->m_Scale = glm::vec3(0.5f, 0.5f, 0.5f);
+        m->m_Scale = glm::vec3(0.005f, 0.005f, 0.005f);
     }
 
-    s_ModelCounter++;
-    m_DrawModel.push_back(m);
-}
-
-void CWindow::SaveModel()
-{
-    CModel* currentModel = CWindow::GetModels().front();
-
-    FILE* out = fopen("Model/main_out.obj", "wt");
-    if (out)
-    {
-        fprintf(out, "# Simple 3D Editor\n");
-        fprintf(out, "mtllib Crate1.mtl\n");
-
-        int objId = 1;
-
-        for (CMesh& mesh : currentModel->m_Meshes)
-        {
-            fprintf(out, "o Object.%03d\n", objId++);
-
-            for (Vertex& v : mesh.m_Vertex)
-                fprintf(out, "v %.6f %.6f %.6f\n", v.Position.x, v.Position.y, v.Position.z);
-
-            for (Vertex& v : mesh.m_Vertex)
-                fprintf(out, "vt %.6f %.6f\n", v.TexCoords.x, (1.f - v.TexCoords.y));
-        }
-
-        fprintf(out, "usemtl Material.001\n");
-        fprintf(out, "s off\n");
-
-        for (CMesh& mesh : currentModel->m_Meshes)
-            for (size_t i = 0; i < mesh.m_Indices.size(); i += 3)
-                fprintf(out, "f %u/%u %u/%u %u/%u\n",
-                    mesh.m_Indices[i] + 1, mesh.m_Indices[i] + 1,
-                    mesh.m_Indices[i + 1] + 1, mesh.m_Indices[i + 1] + 1,
-                    mesh.m_Indices[i + 2] + 1, mesh.m_Indices[i + 2] + 1);
-
-        fclose(out);
-    }
+    m_DrawModel[m_ModelCounter] = m;
+    return m_DrawModel[m_ModelCounter++];
 }
 
 GLuint CWindow::CompileShader(const char* shaderCode, GLenum type)

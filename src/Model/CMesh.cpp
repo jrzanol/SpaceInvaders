@@ -11,8 +11,6 @@ CMesh::CMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int
     m_Indices = indices;
     m_Textures = textures;
 
-    CalculateNormals();
-
     // Generate Buffers.
     glGenVertexArrays(1, &m_VAOId);
     glGenBuffers(1, &m_VBOId);
@@ -120,31 +118,29 @@ void CMesh::Draw(GLuint programId, unsigned int curTexture) const
         unsigned int normalNr = 1;
         unsigned int heightNr = 1;
 
-        size_t i = curTexture;
+        for (size_t i = 0; i < m_Textures.size(); ++i)
+        {
+            // Ativa a Textura atual a ser renderizada.
+            glActiveTexture(GL_TEXTURE0 + i);
 
-        if (i >= m_Textures.size())
-            i = 0;
+            std::string number;
+            std::string name = m_Textures[i].m_Type;
 
-        // Ativa a Textura atual a ser renderizada.
-        glActiveTexture(GL_TEXTURE0 + i);
+            if (name == "texture_diffuse")
+                number = std::to_string(diffuseNr++);
+            else if (name == "texture_specular")
+                number = std::to_string(specularNr++);
+            else if (name == "texture_normal")
+                number = std::to_string(normalNr++);
+            else if (name == "texture_height")
+                number = std::to_string(heightNr++);
 
-        std::string number;
-        std::string name = m_Textures[i].m_Type;
+            // now set the sampler to the correct texture unit
+            glUniform1i(glGetUniformLocation(programId, (name + number).c_str()), i);
 
-        if (name == "texture_diffuse")
-            number = std::to_string(diffuseNr++);
-        else if (name == "texture_specular")
-            number = std::to_string(specularNr++);
-        else if (name == "texture_normal")
-            number = std::to_string(normalNr++);
-        else if (name == "texture_height")
-            number = std::to_string(heightNr++);
-
-        // now set the sampler to the correct texture unit
-        glUniform1i(glGetUniformLocation(programId, (name + number).c_str()), i);
-
-        // and finally bind the texture
-        glBindTexture(GL_TEXTURE_2D, m_Textures[i].m_Id);
+            // and finally bind the texture
+            glBindTexture(GL_TEXTURE_2D, m_Textures[i].m_Id);
+        }
     }
 
     // Bind buffer vector of object.
@@ -155,12 +151,6 @@ void CMesh::Draw(GLuint programId, unsigned int curTexture) const
 
     // Draw vertices.
     glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(m_Indices.size()), GL_UNSIGNED_INT, 0);
-
-    // Set wireframe option.
-    glUniform1i(glGetUniformLocation(programId, "u_wireframe"), 1);
-
-    // Draw vertices.
-    glDrawElements(GL_LINE_STRIP, static_cast<unsigned int>(m_Indices.size()), GL_UNSIGNED_INT, 0);
 
     // Unbind the active buffer.
     glBindVertexArray(0);

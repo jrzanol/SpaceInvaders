@@ -11,7 +11,7 @@ CModel CModel::g_List[MAX_OBJECT];
 
 CModel* CModel::g_SelectedModel = NULL;
 
-CModel::CModel() : CAnimation()
+CModel::CModel()
 {
     m_Position = glm::vec3(0.f, 0.f, 0.f);
     m_Scale = glm::vec3(1.f, 1.f, 1.f);
@@ -31,14 +31,6 @@ void CModel::Reset()
     g_SelectedModel = NULL;
 }
 
-const char* CModel::ToString() const
-{
-    static char str[128];
-
-    sprintf(str, "Obj[%s] %.2f,%.2f,%.2f %.2f,%.2f,%.2f %.2f %d", m_ObjName.c_str(), m_Position.x, m_Position.y, m_Position.z, m_Scale.x, m_Scale.y, m_Scale.z, m_Angle, m_SelectedTexture);
-    return str;
-}
-
 void CModel::Draw(GLuint programId, const glm::mat4& vp) const
 {
     if (g_SelectedModel == this)
@@ -53,19 +45,6 @@ void CModel::Draw(GLuint programId, const glm::mat4& vp) const
 
     for (const auto& it : m_Meshes)
         it.Draw(programId, m_SelectedTexture);
-}
-
-bool CModel::GetAnimation()
-{
-    return m_AniAtived;
-}
-
-void CModel::SetAnimation(bool v)
-{
-    m_AniAtived = v;
-
-    if (m_AniAtived)
-        FixAnimation(true);
 }
 
 glm::mat4& CModel::GetModelPos() const
@@ -100,7 +79,6 @@ CModel* CModel::LoadModel(std::string file)
 
     // process ASSIMP's root node recursively
     obj->ProcessModelNode(scene->mRootNode, scene);
-    obj->ReadAnimation(obj->m_ObjDir.c_str());
 
     if (g_SelectedModel == NULL)
         g_SelectedModel = obj;

@@ -70,11 +70,11 @@
     <ClCompile Include="Model\CModel.cpp">
       <Filter>Model</Filter>
     </ClCompile>
-    <ClCompile Include="Editor\CAnimation.cpp">
-      <Filter>Editor</Filter>
-    </ClCompile>
     <ClCompile Include="Editor\CLight.cpp">
       <Filter>Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="Interface\CGame.cpp">
+      <Filter>Interface</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -105,11 +105,11 @@
     <ClInclude Include="Model\CModel.h">
       <Filter>Model</Filter>
     </ClInclude>
-    <ClInclude Include="Editor\CAnimation.h">
-      <Filter>Editor</Filter>
-    </ClInclude>
     <ClInclude Include="Editor\CLight.h">
       <Filter>Editor</Filter>
+    </ClInclude>
+    <ClInclude Include="Interface\CGame.h">
+      <Filter>Interface</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
