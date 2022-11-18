@@ -172,23 +172,16 @@ bool CWindow::Render()
 CModel* CWindow::CreateModel(int type, const char* fileModel)
 {
     CModel* m = CModel::LoadModel(fileModel);
-    glm::vec3* pos = m->GetPosition();
-
-    int xmul = (m_ModelCounter / 7);
-    int zmul = (m_ModelCounter % 7);
-
-    *pos = glm::vec3(5.f * xmul, 0.f, -5.f * zmul);
+    m->m_Scale = glm::vec3(0.1f, 0.1f, 0.1f);
 
     if (type == 1)
     {
-        pos->y = -1.f;
-        m->m_Scale = glm::vec3(1.f, 1.f, 1.f);
+        glm::vec3* pos = m->GetPosition();
+        pos->z = -30.f;
     }
-    else if (type == 2)
-    {
-        pos->y = 0.75f;
-        m->m_Scale = glm::vec3(0.005f, 0.005f, 0.005f);
-    }
+
+    m->m_InitPosition = *m->GetPosition();
+    m->m_SpawnTime = g_LastTime;
 
     m_DrawModel[m_ModelCounter] = m;
     return m_DrawModel[m_ModelCounter++];

@@ -19,6 +19,9 @@ CModel::CModel()
 
     m_TextCoord = 0.f;
     m_SelectedTexture = 0;
+
+    m_InitPosition = m_Position;
+    m_SpawnTime = 0.f;
 }
 
 void CModel::Reset()

@@ -27,6 +27,9 @@ public:
 	float m_TextCoord;
 	int m_SelectedTexture;
 
+	glm::vec3 m_InitPosition;
+	float m_SpawnTime;
+
 	// Load File or Find Object.
 	static CModel* LoadModel(std::string);
 
