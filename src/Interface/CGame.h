@@ -16,5 +16,7 @@ public:
 
 	void ProcessMiliSecTimer();
 	void ProcessSecTimer();
+
+	static bool CheckMovement(CModel*, glm::vec3);
 };
 

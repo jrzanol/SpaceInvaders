@@ -262,9 +262,9 @@ bool CPickItem::IntersectSphere(stIntersect& out, bool onlySelected)
         glm::vec3 direction = (glm::vec3(to) - glm::vec3(from));
         float minDistOfSphere = 9999999.f;
 
-        for (CMesh& mesh : it->m_Meshes)
+        for (CMesh* mesh : it->m_Meshes)
         {
-            for (Vertex& v : mesh.m_Vertex)
+            for (Vertex& v : mesh->m_Vertex)
             {
                 float t1, t2;
 
@@ -273,7 +273,7 @@ bool CPickItem::IntersectSphere(stIntersect& out, bool onlySelected)
                     if (t1 < minDistOfSphere)
                     {
                         out.m_Model = it;
-                        out.m_Mesh = &mesh;
+                        out.m_Mesh = mesh;
                         out.m_Vertex = &v;
                         out.m_Indices = NULL;
 
@@ -324,14 +324,14 @@ bool CPickItem::IntersectSurface(stIntersect& out, bool onlySelected)
 
         glm::vec3 direction = (glm::vec3(to) - glm::vec3(from));
 
-        for (CMesh& itmesh : it->m_Meshes)
+        for (CMesh* itmesh : it->m_Meshes)
         {
-            for (unsigned int id = 0; id < itmesh.m_Indices.size(); id += 3)
+            for (unsigned int id = 0; id < itmesh->m_Indices.size(); id += 3)
             {
                 glm::vec3 triangule[3];
-                triangule[0] = itmesh.m_Vertex[itmesh.m_Indices[id]].Position;
-                triangule[1] = itmesh.m_Vertex[itmesh.m_Indices[id + 1]].Position;
-                triangule[2] = itmesh.m_Vertex[itmesh.m_Indices[id + 2]].Position;
+                triangule[0] = itmesh->m_Vertex[itmesh->m_Indices[id]].Position;
+                triangule[1] = itmesh->m_Vertex[itmesh->m_Indices[id + 1]].Position;
+                triangule[2] = itmesh->m_Vertex[itmesh->m_Indices[id + 2]].Position;
 
                 if (CUtil::RayIntersectsTriangle(glm::vec3(from), glm::vec3(to), triangule, outIntersectionPoint))
                 {
@@ -341,9 +341,9 @@ bool CPickItem::IntersectSurface(stIntersect& out, bool onlySelected)
                     if (dist < minDistOfSurface)
                     {
                         out.m_Model = it;
-                        out.m_Mesh = &itmesh;
+                        out.m_Mesh = itmesh;
                         out.m_Vertex = NULL;
-                        out.m_Indices = &itmesh.m_Indices[id];
+                        out.m_Indices = &itmesh->m_Indices[id];
 
                         finded = true;
                         minDistOfSurface = dist;

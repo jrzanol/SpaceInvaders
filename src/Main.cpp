@@ -6,8 +6,12 @@
 #include "CEvent.h"
 #include "CWindow.h"
 
+#include <ctime>
+
 int main(int argc, const char* argv[])
 {
+    srand((unsigned int)_time32(0));
+
     CWindow window;
 
     if (!window.Initialize())

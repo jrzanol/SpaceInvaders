@@ -37,17 +37,23 @@ struct Vertex
 	}
 };
 
+const int MAX_MESH = 32;
+
 class CMesh
 {
 public:
-	CMesh(const std::vector<Vertex>&, const std::vector<unsigned int>&, const std::vector<Texture>&);
+	CMesh();
 
 	void Draw(GLuint, unsigned int) const;
 	void AllocBuffer();
 
+	std::string m_ObjName;
 	std::vector<Vertex> m_Vertex;
 	std::vector<Texture> m_Textures;
 	std::vector<unsigned int> m_Indices;
+
+	static std::vector<CMesh*> Get(const std::string);
+	static CMesh* Load(const std::string, const std::vector<Vertex>&, const std::vector<unsigned int>&, const std::vector<Texture>&);
 
 private:
 	GLuint m_VBOId;
@@ -55,5 +61,8 @@ private:
 	GLuint m_VAOId;
 
 	void CalculateNormals();
+
+	static CMesh g_Mesh[MAX_MESH];
+	static unsigned int g_MeshCounter;
 };
 

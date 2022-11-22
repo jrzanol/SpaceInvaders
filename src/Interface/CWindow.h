@@ -24,7 +24,6 @@ public:
 	static CModel* GetModel(unsigned int);
 	static unsigned int GetModelCount();
 
-	static const unsigned int MAX_MODEL = 64;
 	static CModel* CreateModel(int, const char*);
 
 private:
@@ -40,6 +39,6 @@ private:
 	static glm::mat4 m_VP;
 
 	static unsigned int m_ModelCounter;
-	static CModel* m_DrawModel[MAX_MODEL];
+	static CModel* m_DrawModel[MAX_OBJECT];
 };
 

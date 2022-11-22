@@ -5,25 +5,58 @@
 #include "CMesh.h"
 #include "CUtil.h"
 
-CMesh::CMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures)
+CMesh CMesh::g_Mesh[MAX_MESH];
+unsigned int CMesh::g_MeshCounter = 0;
+
+CMesh::CMesh()
 {
-    m_Vertex = vertices;
-    m_Indices = indices;
-    m_Textures = textures;
+    m_ObjName.clear();
+    m_Vertex.clear();
+    m_Textures.clear();
+    m_Indices.clear();
+
+    m_VBOId = 0;
+    m_EBOId = 0;
+    m_VAOId = 0;
+}
+
+std::vector<CMesh*> CMesh::Get(const std::string file)
+{
+    static std::vector<CMesh*> tmp; tmp.clear();
+
+    for (auto& it : g_Mesh)
+        if (it.m_ObjName == file)
+            tmp.push_back(&it);
+
+    return tmp;
+}
+
+CMesh* CMesh::Load(const std::string file, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures)
+{
+    for (auto& it : g_Mesh)
+        if (it.m_ObjName == file)
+            return &it;
+
+    CMesh* m = &g_Mesh[g_MeshCounter];
+
+    m->m_ObjName = file;
+    m->m_Vertex = vertices;
+    m->m_Indices = indices;
+    m->m_Textures = textures;
 
     // Generate Buffers.
-    glGenVertexArrays(1, &m_VAOId);
-    glGenBuffers(1, &m_VBOId);
-    glGenBuffers(1, &m_EBOId);
+    glGenVertexArrays(1, &m->m_VAOId);
+    glGenBuffers(1, &m->m_VBOId);
+    glGenBuffers(1, &m->m_EBOId);
 
     // Set Vertex buffer.
-    glBindVertexArray(m_VAOId);
-    glBindBuffer(GL_ARRAY_BUFFER, m_VBOId);
-    glBufferData(GL_ARRAY_BUFFER, m_Vertex.size() * sizeof(Vertex), &m_Vertex[0], GL_STATIC_DRAW);
+    glBindVertexArray(m->m_VAOId);
+    glBindBuffer(GL_ARRAY_BUFFER, m->m_VBOId);
+    glBufferData(GL_ARRAY_BUFFER, m->m_Vertex.size() * sizeof(Vertex), &m->m_Vertex[0], GL_STATIC_DRAW);
     
     // Set Indices buffer.
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBOId);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(unsigned int), &m_Indices[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m->m_EBOId);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m->m_Indices.size() * sizeof(unsigned int), &m->m_Indices[0], GL_STATIC_DRAW);
 
     // Vertex Positions.
     glEnableVertexAttribArray(0);
@@ -47,6 +80,9 @@ CMesh::CMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int
 
     // Unbind the active buffer.
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    g_MeshCounter++;
+    return m;
 }
 
 void CMesh::AllocBuffer()

@@ -19,7 +19,7 @@ public:
 
 	std::string m_ObjName;
 	std::string m_ObjDir;
-	std::vector<CMesh> m_Meshes;
+	std::vector<CMesh*> m_Meshes;
 	
 	glm::vec3 m_Scale;
 	float m_Angle;
@@ -29,6 +29,7 @@ public:
 
 	glm::vec3 m_InitPosition;
 	float m_SpawnTime;
+	bool m_StopMovement;
 
 	// Load File or Find Object.
 	static CModel* LoadModel(std::string);
@@ -40,7 +41,7 @@ private:
 	glm::vec3 m_Position;
 
 	void ProcessModelNode(aiNode*, const aiScene*);
-	CMesh ProcessModelMesh(aiMesh*, const aiScene*);
+	CMesh* ProcessModelMesh(aiMesh*, const aiScene*);
 
 	static int g_ListCounter;
 	static CModel g_List[MAX_OBJECT];

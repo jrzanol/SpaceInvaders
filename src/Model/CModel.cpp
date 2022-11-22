@@ -22,6 +22,7 @@ CModel::CModel()
 
     m_InitPosition = m_Position;
     m_SpawnTime = 0.f;
+    m_StopMovement = false;
 }
 
 void CModel::Reset()
@@ -46,8 +47,8 @@ void CModel::Draw(GLuint programId, const glm::mat4& vp) const
     glm::mat4 model = GetModelPos();
     glUniformMatrix4fv(glGetUniformLocation(programId, "u_model"), 1, GL_FALSE, glm::value_ptr(model));
 
-    for (const auto& it : m_Meshes)
-        it.Draw(programId, m_SelectedTexture);
+    for (const auto* it : m_Meshes)
+        it->Draw(programId, m_SelectedTexture);
 }
 
 glm::mat4& CModel::GetModelPos() const
@@ -71,17 +72,24 @@ CModel* CModel::LoadModel(std::string file)
     obj->m_ObjName = file;
     obj->m_ObjDir = file.substr(0, file.find('/'));
 
-    Assimp::Importer importer;
+    const auto getMeshLoaded = CMesh::Get(file);
 
-    const aiScene* scene = importer.ReadFile(file, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+    if (getMeshLoaded.size() > 0)
+        obj->m_Meshes = getMeshLoaded;
+    else
     {
-        std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
-        return NULL;
-    }
+        Assimp::Importer importer;
 
-    // process ASSIMP's root node recursively
-    obj->ProcessModelNode(scene->mRootNode, scene);
+        const aiScene* scene = importer.ReadFile(file, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+        if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+        {
+            std::cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
+            return NULL;
+        }
+
+        // process ASSIMP's root node recursively
+        obj->ProcessModelNode(scene->mRootNode, scene);
+    }
 
     if (g_SelectedModel == NULL)
         g_SelectedModel = obj;
@@ -108,7 +116,7 @@ void CModel::ProcessModelNode(aiNode* node, const aiScene* scene)
     }
 }
 
-CMesh CModel::ProcessModelMesh(aiMesh* mesh, const aiScene* scene)
+CMesh* CModel::ProcessModelMesh(aiMesh* mesh, const aiScene* scene)
 {
     // data to fill
     std::vector<Vertex> vertices;
@@ -189,6 +197,6 @@ CMesh CModel::ProcessModelMesh(aiMesh* mesh, const aiScene* scene)
     textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
     // return a mesh object created from the extracted mesh data
-    return CMesh(vertices, indices, textures);
+    return CMesh::Load(m_ObjName.c_str(), vertices, indices, textures);
 }
 

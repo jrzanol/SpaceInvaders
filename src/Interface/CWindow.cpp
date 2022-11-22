@@ -7,7 +7,7 @@
 glm::mat4 CWindow::m_VP;
 
 unsigned int CWindow::m_ModelCounter = 0;
-CModel* CWindow::m_DrawModel[MAX_MODEL];
+CModel* CWindow::m_DrawModel[MAX_OBJECT];
 
 CWindow::CWindow()
 {
@@ -113,7 +113,7 @@ void CWindow::Cleanup()
 bool CWindow::Render()
 {
     // Clear OpenGl frame.
-    glClearColor(0.25f, 0.25f, 0.25f, 1.f);
+    glClearColor(0.f, 0.f, 0.f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Set Transforms.
@@ -171,20 +171,27 @@ bool CWindow::Render()
 
 CModel* CWindow::CreateModel(int type, const char* fileModel)
 {
-    CModel* m = CModel::LoadModel(fileModel);
-    m->m_Scale = glm::vec3(0.1f, 0.1f, 0.1f);
+    glm::vec3 newPosition = glm::vec3((-0.75f + 1.8f * (5.f - (rand() % 10))), 0.f, -30.f);
 
-    if (type == 1)
+    if (CGame::CheckMovement(NULL, newPosition))
     {
-        glm::vec3* pos = m->GetPosition();
-        pos->z = -30.f;
+        CModel* m = CModel::LoadModel(fileModel);
+        if (m)
+        {
+            m->m_Scale = glm::vec3(0.1f, 0.1f, 0.1f);
+
+            if (type == 1)
+                *m->GetPosition() = newPosition;
+
+            m->m_InitPosition = newPosition;
+            m->m_SpawnTime = g_LastTime;
+
+            m_DrawModel[m_ModelCounter] = m;
+            return m_DrawModel[m_ModelCounter++];
+        }
     }
 
-    m->m_InitPosition = *m->GetPosition();
-    m->m_SpawnTime = g_LastTime;
-
-    m_DrawModel[m_ModelCounter] = m;
-    return m_DrawModel[m_ModelCounter++];
+    return NULL;
 }
 
 GLuint CWindow::CompileShader(const char* shaderCode, GLenum type)
