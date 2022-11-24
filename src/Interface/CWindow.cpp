@@ -6,9 +6,6 @@
 
 glm::mat4 CWindow::m_VP;
 
-unsigned int CWindow::m_ModelCounter = 0;
-CModel* CWindow::m_DrawModel[MAX_OBJECT];
-
 CWindow::CWindow()
 {
     g_Window = NULL;
@@ -20,9 +17,6 @@ CWindow::~CWindow()
 }
 
 const glm::mat4& CWindow::GetVP() { return m_VP; }
-
-CModel* CWindow::GetModel(unsigned int Id) { return m_DrawModel[Id]; }
-unsigned int CWindow::GetModelCount() { return m_ModelCounter; }
 
 bool CWindow::Initialize()
 {
@@ -127,8 +121,12 @@ bool CWindow::Render()
     m_Light.Draw(m_ProgramId);
     
     // Draw objects.
-    for (unsigned int i = 0; i < m_ModelCounter; ++i)
-        m_DrawModel[i]->Draw(m_ProgramId, m_VP);
+    for (unsigned int i = 0; i < MAX_OBJECT; ++i)
+    {
+        CModel* m = CModel::GetModel(i);
+        if (m)
+            m->Draw(m_ProgramId, m_VP);
+    }
 
     // Start the Dear ImGui frame.
     ImGui_ImplOpenGL3_NewFrame();
@@ -173,21 +171,35 @@ CModel* CWindow::CreateModel(int type, const char* fileModel)
 {
     glm::vec3 newPosition = glm::vec3((-0.75f + 1.8f * (5.f - (rand() % 10))), 0.f, -30.f);
 
-    if (CGame::CheckMovement(NULL, newPosition))
+    if (type == 4 || CGame::CheckMovement(newPosition))
     {
-        CModel* m = CModel::LoadModel(fileModel);
+        int outId;
+
+        CModel* m = CModel::LoadModel(fileModel, outId);
         if (m)
         {
-            m->m_Scale = glm::vec3(0.1f, 0.1f, 0.1f);
+            if (type < 4)
+            {
+                m->m_Scale = glm::vec3(0.1f, 0.1f, 0.1f);
+                
+                if (type == 1 || type == 2 || type == 3)
+                    *m->GetPosition() = newPosition;
+            }
+            else if (type == 4)
+            {
+                m->m_Scale = glm::vec3(0.05f, 0.f, 0.5f);
 
-            if (type == 1)
+                newPosition = *CModel::GetModel(0)->GetPosition();
+                newPosition.z -= 2.f;
+
                 *m->GetPosition() = newPosition;
+            }
 
             m->m_InitPosition = newPosition;
             m->m_SpawnTime = g_LastTime;
+            m->m_ModelType = type;
 
-            m_DrawModel[m_ModelCounter] = m;
-            return m_DrawModel[m_ModelCounter++];
+            return m;
         }
     }
 

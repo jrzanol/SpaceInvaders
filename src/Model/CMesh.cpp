@@ -33,10 +33,6 @@ std::vector<CMesh*> CMesh::Get(const std::string file)
 
 CMesh* CMesh::Load(const std::string file, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures)
 {
-    for (auto& it : g_Mesh)
-        if (it.m_ObjName == file)
-            return &it;
-
     CMesh* m = &g_Mesh[g_MeshCounter];
 
     m->m_ObjName = file;
@@ -178,6 +174,8 @@ void CMesh::Draw(GLuint programId, unsigned int curTexture) const
             glBindTexture(GL_TEXTURE_2D, m_Textures[i].m_Id);
         }
     }
+    else
+        glBindTexture(GL_TEXTURE_2D, 0);
 
     // Bind buffer vector of object.
     glBindVertexArray(m_VAOId);

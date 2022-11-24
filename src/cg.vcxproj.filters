@@ -58,9 +58,6 @@
     <ClCompile Include="Util\CUtil.cpp">
       <Filter>Util</Filter>
     </ClCompile>
-    <ClCompile Include="Editor\CPickItem.cpp">
-      <Filter>Editor</Filter>
-    </ClCompile>
     <ClCompile Include="Interface\CCamera.cpp">
       <Filter>Interface</Filter>
     </ClCompile>
@@ -92,9 +89,6 @@
     </ClInclude>
     <ClInclude Include="Util\CUtil.h">
       <Filter>Util</Filter>
-    </ClInclude>
-    <ClInclude Include="Editor\CPickItem.h">
-      <Filter>Editor</Filter>
     </ClInclude>
     <ClInclude Include="Interface\CCamera.h">
       <Filter>Interface</Filter>

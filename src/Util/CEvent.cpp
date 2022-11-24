@@ -6,7 +6,6 @@
 #include "CUtil.h"
 #include "CEvent.h"
 #include "CModel.h"
-#include "CPickItem.h"
 
 std::vector<CEvent*>* g_EventList;
 

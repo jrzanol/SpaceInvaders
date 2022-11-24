@@ -201,7 +201,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Editor\CLight.cpp" />
-    <ClCompile Include="Editor\CPickItem.cpp" />
     <ClCompile Include="Interface\CCamera.cpp" />
     <ClCompile Include="Interface\CGame.cpp" />
     <ClCompile Include="Interface\CWindow.cpp" />
@@ -220,7 +219,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Editor\CLight.h" />
-    <ClInclude Include="Editor\CPickItem.h" />
     <ClInclude Include="Interface\CCamera.h" />
     <ClInclude Include="Interface\CGame.h" />
     <ClInclude Include="Interface\CWindow.h" />

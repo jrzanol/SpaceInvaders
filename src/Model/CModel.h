@@ -30,20 +30,19 @@ public:
 	glm::vec3 m_InitPosition;
 	float m_SpawnTime;
 	bool m_StopMovement;
+	int m_ModelType;
 
-	// Load File or Find Object.
-	static CModel* LoadModel(std::string);
-
-	static void Reset();
-	static CModel* g_SelectedModel;
+	static CModel* GetModel(int);
+	static CModel* LoadModel(std::string, int&);
+	static void DeleteModel(CModel*);
 
 private:
+	bool m_Atived;
 	glm::vec3 m_Position;
 
 	void ProcessModelNode(aiNode*, const aiScene*);
 	CMesh* ProcessModelMesh(aiMesh*, const aiScene*);
 
-	static int g_ListCounter;
 	static CModel g_List[MAX_OBJECT];
 };
 

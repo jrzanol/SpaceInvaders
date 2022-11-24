@@ -20,10 +20,6 @@ public:
 	bool Render();
 
 	static const glm::mat4& GetVP();
-
-	static CModel* GetModel(unsigned int);
-	static unsigned int GetModelCount();
-
 	static CModel* CreateModel(int, const char*);
 
 private:
@@ -37,8 +33,5 @@ private:
 	GLuint LinkProgram(GLuint, GLuint);
 
 	static glm::mat4 m_VP;
-
-	static unsigned int m_ModelCounter;
-	static CModel* m_DrawModel[MAX_OBJECT];
 };
 

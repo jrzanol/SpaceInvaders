@@ -6,7 +6,6 @@
 #include "CUtil.h"
 #include "CModel.h"
 #include "CCamera.h"
-#include "CPickItem.h"
 
 CCamera::CCamera()
 {

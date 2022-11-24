@@ -6,13 +6,11 @@
 #include "CUtil.h"
 #include "CModel.h"
 
-int CModel::g_ListCounter = 0;
 CModel CModel::g_List[MAX_OBJECT];
-
-CModel* CModel::g_SelectedModel = NULL;
 
 CModel::CModel()
 {
+    m_Atived = false;
     m_Position = glm::vec3(0.f, 0.f, 0.f);
     m_Scale = glm::vec3(1.f, 1.f, 1.f);
     m_Angle = 0.f;
@@ -23,25 +21,15 @@ CModel::CModel()
     m_InitPosition = m_Position;
     m_SpawnTime = 0.f;
     m_StopMovement = false;
-}
-
-void CModel::Reset()
-{
-    g_ListCounter = 0;
-
-    for (int i = 0; i < MAX_OBJECT; ++i)
-        g_List[i] = CModel();
-
-    g_SelectedModel = NULL;
+    m_ModelType = -1;
 }
 
 void CModel::Draw(GLuint programId, const glm::mat4& vp) const
 {
-    if (g_SelectedModel == this)
-        glUniform1i(glGetUniformLocation(programId, "u_wireframeColor"), 1);
-    else
-        glUniform1i(glGetUniformLocation(programId, "u_wireframeColor"), 0);
+    if (!m_Atived)
+        return;
 
+    glUniform1i(glGetUniformLocation(programId, "u_wireframeColor"), 0);
     glUniform1f(glGetUniformLocation(programId, "u_textcoord"), m_TextCoord);
 
     glm::mat4 model = GetModelPos();
@@ -63,12 +51,32 @@ glm::mat4& CModel::GetModelPos() const
     return model;
 }
 
-CModel* CModel::LoadModel(std::string file)
+CModel* CModel::GetModel(int Id)
 {
-    if (g_ListCounter >= MAX_OBJECT)
+    if (!g_List[Id].m_Atived)
         return NULL;
 
-    CModel* obj = &g_List[g_ListCounter];
+    return &g_List[Id];
+}
+
+CModel* CModel::LoadModel(std::string file, int& outId)
+{
+    static int listCounter = 0;
+
+    if (listCounter >= MAX_OBJECT || g_List[listCounter].m_Atived)
+    {
+        if (listCounter >= MAX_OBJECT)
+            listCounter = 0;
+
+        for (; listCounter < MAX_OBJECT; ++listCounter)
+            if (!g_List[listCounter].m_Atived)
+                break;
+
+        if (listCounter == MAX_OBJECT)
+            return NULL;
+    }
+
+    CModel* obj = &g_List[listCounter];
     obj->m_ObjName = file;
     obj->m_ObjDir = file.substr(0, file.find('/'));
 
@@ -91,11 +99,17 @@ CModel* CModel::LoadModel(std::string file)
         obj->ProcessModelNode(scene->mRootNode, scene);
     }
 
-    if (g_SelectedModel == NULL)
-        g_SelectedModel = obj;
+    outId = listCounter;
+    listCounter++;
 
-    g_ListCounter++;
+    obj->m_Atived = true;
     return obj;
+}
+
+void CModel::DeleteModel(CModel* m)
+{
+    int Id = ((unsigned int)m - (unsigned int)g_List) / sizeof(CModel);
+    g_List[Id].m_Atived = false;
 }
 
 // processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).

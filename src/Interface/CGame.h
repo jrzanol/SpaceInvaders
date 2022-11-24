@@ -14,9 +14,11 @@ public:
 
 	void Initialize();
 
+	void ProcessInput(GLFWwindow*);
+	void ProcessMouseButtonEvent(GLFWwindow*, int, int, int);
 	void ProcessMiliSecTimer();
 	void ProcessSecTimer();
 
-	static bool CheckMovement(CModel*, glm::vec3);
+	static bool CheckMovement(glm::vec3, CModel* = NULL);
 };
 
