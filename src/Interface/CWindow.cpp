@@ -118,6 +118,7 @@ bool CWindow::Render()
     glUniformMatrix4fv(glGetUniformLocation(m_ProgramId, "u_vp"), 1, GL_FALSE, glm::value_ptr(m_VP));
 
     // Draw Lights.
+    //for (auto& it : m_Light)
     m_Light.Draw(m_ProgramId);
     
     // Draw objects.
@@ -171,11 +172,9 @@ CModel* CWindow::CreateModel(int type, const char* fileModel)
 {
     glm::vec3 newPosition = glm::vec3((-0.75f + 1.8f * (5.f - (rand() % 10))), 0.f, -30.f);
 
-    if (type == 4 || CGame::CheckMovement(newPosition))
+    if (type == 4 || type == 5 || CGame::CheckMovement(newPosition) == NULL)
     {
-        int outId;
-
-        CModel* m = CModel::LoadModel(fileModel, outId);
+        CModel* m = CModel::LoadModel(fileModel);
         if (m)
         {
             if (type < 4)
@@ -190,7 +189,14 @@ CModel* CWindow::CreateModel(int type, const char* fileModel)
                 m->m_Scale = glm::vec3(0.05f, 0.f, 0.5f);
 
                 newPosition = *CModel::GetModel(0)->GetPosition();
-                newPosition.z -= 2.f;
+                newPosition.z -= 1.5f;
+
+                *m->GetPosition() = newPosition;
+            }
+            else if (type == 5)
+            {
+                m->m_Scale = glm::vec3(0.3f, 0.f, 0.5f);
+                newPosition = glm::vec3(0.f, -15.f, -5.f);
 
                 *m->GetPosition() = newPosition;
             }

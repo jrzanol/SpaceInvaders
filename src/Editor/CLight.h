@@ -9,10 +9,14 @@ class CLight
 public:
 	CLight();
 
-	void Draw(GLuint) const;
+	void Draw(GLuint);
+	void ProcessMiliSecTimer();
+	void ProcessSecTimer();
 
 private:
-	glm::vec3 s_LightPos;
-	glm::vec3 s_LightColor;
+	int m_Id;
+
+	glm::vec3 m_LightPos;
+	glm::vec3 m_LightColor;
 };
 

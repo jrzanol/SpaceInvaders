@@ -5,6 +5,10 @@
 #include "CWindow.h"
 #include "CGame.h"
 
+//static const int g_StarsPosition[][2] = {
+//
+//};
+
 CGame::CGame() : CEvent()
 {
 }
@@ -17,6 +21,11 @@ void CGame::Initialize()
 {
     // Load Models.
     CModel* player = CWindow::CreateModel(0, "Mesh/Player.obj");
+
+    // Pre-Load Enemy Models.
+    CModel::LoadModel("Mesh/Enemy.obj", false);
+    CModel::LoadModel("Mesh/Enemy2.obj", false);
+    CModel::LoadModel("Mesh/Enemy3.obj", false);
 }
 
 void CGame::ProcessInput(GLFWwindow* window)
@@ -83,12 +92,12 @@ void CGame::ProcessMiliSecTimer()
                 const float diff = (g_LastTime - it->m_SpawnTime);
                 if (diff > 0.f)
                 {
-                    newPos.z = (it->m_InitPosition.z + ((100.f / 15.f) * diff));
+                    newPos.z = (it->m_InitPosition.z + (10.f * diff));
 
                     if (newPos.z > -10.f)
                         newPos.z = -10.f;
 
-                    if (CheckMovement(newPos, it))
+                    if (CheckMovement(newPos, it) == NULL)
                         *pos = newPos;
                     else
                         it->m_StopMovement = true;
@@ -104,7 +113,16 @@ void CGame::ProcessMiliSecTimer()
             {
                 const float diff = (g_LastTime - it->m_SpawnTime);
                 if (diff > 0.f)
-                    pos->z = (it->m_InitPosition.z - ((100.f / 15.f) * diff));
+                {
+                    pos->z = (it->m_InitPosition.z - (20.f * diff));
+
+                    CModel* enemy = CheckMovement(*pos);
+                    if (enemy != NULL)
+                    {
+                        CModel::DeleteModel(it);
+                        CModel::DeleteModel(enemy);
+                    }
+                }
             }
             else
                 CModel::DeleteModel(it);
@@ -124,25 +142,25 @@ void CGame::ProcessSecTimer()
         CWindow::CreateModel(3, "Mesh/Enemy3.obj");
 }
 
-bool CGame::CheckMovement(glm::vec3 newPosition, CModel* thisModel)
+CModel* CGame::CheckMovement(glm::vec3 newPosition, CModel* thisModel)
 {
     for (int Id = 1; Id < MAX_OBJECT; ++Id)
     {
         CModel* it = CModel::GetModel(Id);
 
-        if (!it || it == thisModel || it->m_ModelType >= 4)
+        if (!it || it == thisModel || it->m_ModelType == 0 || it->m_ModelType >= 4)
             continue;
 
         glm::vec3* pos = it->GetPosition();
 
-        float minx = (pos->x - 1.5f);
-        float maxx = (pos->x + 1.5f);
-        float minz = (pos->z - 2.5f);
-        float maxz = (pos->z + 2.5f);
+        float minx = (pos->x - 1.0f);
+        float maxx = (pos->x + 1.0f);
+        float minz = (pos->z - 2.f);
+        float maxz = (pos->z + 2.f);
 
         if (newPosition.x > minx && newPosition.x < maxx && newPosition.z >= minz && newPosition.z <= maxz)
-            return false;
+            return it;
     }
 
-    return true;
+    return NULL;
 }

@@ -17,7 +17,7 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Editor">
+    <Filter Include="Game">
       <UniqueIdentifier>{881fe445-063c-4411-a0e8-91a75b79a409}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -68,10 +68,10 @@
       <Filter>Model</Filter>
     </ClCompile>
     <ClCompile Include="Editor\CLight.cpp">
-      <Filter>Editor</Filter>
+      <Filter>Game</Filter>
     </ClCompile>
     <ClCompile Include="Interface\CGame.cpp">
-      <Filter>Interface</Filter>
+      <Filter>Game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -100,10 +100,10 @@
       <Filter>Model</Filter>
     </ClInclude>
     <ClInclude Include="Editor\CLight.h">
-      <Filter>Editor</Filter>
+      <Filter>Game</Filter>
     </ClInclude>
     <ClInclude Include="Interface\CGame.h">
-      <Filter>Interface</Filter>
+      <Filter>Game</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

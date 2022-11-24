@@ -59,7 +59,7 @@ CModel* CModel::GetModel(int Id)
     return &g_List[Id];
 }
 
-CModel* CModel::LoadModel(std::string file, int& outId)
+CModel* CModel::LoadModel(std::string file, bool spawn)
 {
     static int listCounter = 0;
 
@@ -99,10 +99,9 @@ CModel* CModel::LoadModel(std::string file, int& outId)
         obj->ProcessModelNode(scene->mRootNode, scene);
     }
 
-    outId = listCounter;
     listCounter++;
 
-    obj->m_Atived = true;
+    obj->m_Atived = spawn;
     return obj;
 }
 

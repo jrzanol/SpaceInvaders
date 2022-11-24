@@ -19,6 +19,6 @@ public:
 	void ProcessMiliSecTimer();
 	void ProcessSecTimer();
 
-	static bool CheckMovement(glm::vec3, CModel* = NULL);
+	static CModel* CheckMovement(glm::vec3, CModel* = NULL);
 };
 

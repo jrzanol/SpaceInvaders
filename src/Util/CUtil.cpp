@@ -79,11 +79,11 @@ const char* CUtil::m_FragmentShader = R"glsl(
             vec3 diffuse2 = max(dot(norm, normalize(lightPos2 - FragPos)), 0.0) * lightColor2;
             vec3 diffuse3 = max(dot(norm, normalize(lightPos3 - FragPos)), 0.0) * lightColor3;
             
-            float ambientStrength = 1.00f;
+            float ambientStrength = 0.65f;
             vec3 ambient = ambientStrength * lightColor;
             
             // Ambient Color:
-            FragColor = vec4(ambient + diffuse + diffuse2 + diffuse3, 1) * objectColor;
+            FragColor = vec4(ambient + diffuse * 2 + diffuse2 + diffuse3, 1) * objectColor;
         }
     }
 )glsl";

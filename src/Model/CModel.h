@@ -33,7 +33,7 @@ public:
 	int m_ModelType;
 
 	static CModel* GetModel(int);
-	static CModel* LoadModel(std::string, int&);
+	static CModel* LoadModel(std::string, bool = true);
 	static void DeleteModel(CModel*);
 
 private:
