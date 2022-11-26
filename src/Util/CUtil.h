@@ -6,7 +6,7 @@
 class CUtil
 {
 public:
-	static int m_EditorType;
+	static int g_EnemyCount;
 
 	static const char* m_VertexShader;
 	static const char* m_FragmentShader;

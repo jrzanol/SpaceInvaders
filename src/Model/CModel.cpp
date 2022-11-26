@@ -15,13 +15,12 @@ CModel::CModel()
     m_Scale = glm::vec3(1.f, 1.f, 1.f);
     m_Angle = 0.f;
 
-    m_TextCoord = 0.f;
-    m_SelectedTexture = 0;
-
     m_InitPosition = m_Position;
     m_SpawnTime = 0.f;
-    m_StopMovement = false;
     m_ModelType = -1;
+
+    m_DecisionOp = false;
+    m_DecisionTimer = 0;
 }
 
 void CModel::Draw(GLuint programId, const glm::mat4& vp) const
@@ -29,14 +28,13 @@ void CModel::Draw(GLuint programId, const glm::mat4& vp) const
     if (!m_Atived)
         return;
 
-    glUniform1i(glGetUniformLocation(programId, "u_wireframeColor"), 0);
-    glUniform1f(glGetUniformLocation(programId, "u_textcoord"), m_TextCoord);
+    glUniform1i(glGetUniformLocation(programId, "u_star"), m_ModelType == 5);
 
     glm::mat4 model = GetModelPos();
     glUniformMatrix4fv(glGetUniformLocation(programId, "u_model"), 1, GL_FALSE, glm::value_ptr(model));
 
     for (const auto* it : m_Meshes)
-        it->Draw(programId, m_SelectedTexture);
+        it->Draw(programId);
 }
 
 glm::mat4& CModel::GetModelPos() const
@@ -107,6 +105,9 @@ CModel* CModel::LoadModel(std::string file, bool spawn)
 
 void CModel::DeleteModel(CModel* m)
 {
+    if (m->m_ModelType >= 1 && m->m_ModelType <= 3)
+        CUtil::g_EnemyCount--;
+
     int Id = ((unsigned int)m - (unsigned int)g_List) / sizeof(CModel);
     g_List[Id].m_Atived = false;
 }

@@ -9,7 +9,7 @@ GLFWwindow* g_Window = NULL;
 float g_DeltaTime = 0;
 float g_LastTime = 0;
 
-int CUtil::m_EditorType = 5;
+int CUtil::g_EnemyCount = 0;
 
 const char* CUtil::m_VertexShader = R"glsl(
     #version 430
@@ -47,9 +47,7 @@ const char* CUtil::m_FragmentShader = R"glsl(
     uniform sampler2D texture_diffuse1;
     uniform sampler2D texture_specular1;
     uniform sampler2D texture_normal1;
-    uniform int u_wireframe;
-    uniform int u_wireframeColor;
-    uniform float u_textcoord;
+    uniform int u_star;
 
     uniform vec3 lightPos;
     uniform vec3 lightPos2;
@@ -59,17 +57,14 @@ const char* CUtil::m_FragmentShader = R"glsl(
     uniform vec3 lightColor3;
     
     void main() {
-        if (u_wireframe != 0) {
-            if (u_wireframeColor == 0)
-                FragColor = vec4(1, 0, 0, 0);
-            else
-                FragColor = vec4(0, 0, 1, 0);
+        if (u_star != 0) {
+            FragColor = vec4(1, 1, 1, 0);
         }
         else {
             // Object Color:
             vec2 newTexCoords;
-            newTexCoords.x = (TexCoords.x + u_textcoord);
-            newTexCoords.y = (TexCoords.y + u_textcoord);
+            newTexCoords.x = (TexCoords.x);
+            newTexCoords.y = (TexCoords.y);
             
             vec4 objectColor = mix(texture(texture_diffuse1, newTexCoords), texture(texture_specular1, newTexCoords), texture(texture_normal1, newTexCoords));
             

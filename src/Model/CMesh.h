@@ -44,7 +44,7 @@ class CMesh
 public:
 	CMesh();
 
-	void Draw(GLuint, unsigned int) const;
+	void Draw(GLuint) const;
 	void AllocBuffer();
 
 	std::string m_ObjName;

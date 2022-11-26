@@ -5,7 +5,7 @@
 
 #include "CMesh.h"
 
-const int MAX_OBJECT = 128;
+const int MAX_OBJECT = 256;
 
 class CModel
 {
@@ -24,13 +24,12 @@ public:
 	glm::vec3 m_Scale;
 	float m_Angle;
 
-	float m_TextCoord;
-	int m_SelectedTexture;
-
 	glm::vec3 m_InitPosition;
 	float m_SpawnTime;
-	bool m_StopMovement;
 	int m_ModelType;
+
+	bool m_DecisionOp;
+	float m_DecisionTimer;
 
 	static CModel* GetModel(int);
 	static CModel* LoadModel(std::string, bool = true);

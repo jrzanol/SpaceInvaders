@@ -19,6 +19,8 @@ public:
 	void ProcessMiliSecTimer();
 	void ProcessSecTimer();
 
+	static glm::vec3* CheckBulletInMyWay(const glm::vec3*);
 	static CModel* CheckMovement(glm::vec3, CModel* = NULL);
+	static CModel* CheckBulletAttack(glm::vec3, CModel* = NULL);
 };
 

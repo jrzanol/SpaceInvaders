@@ -138,7 +138,7 @@ void CMesh::CalculateNormals() {
         m_Vertex[i].Normal = glm::normalize(m_Vertex[i].Normal);
 }
 
-void CMesh::Draw(GLuint programId, unsigned int curTexture) const
+void CMesh::Draw(GLuint programId) const
 {
     if (m_Indices.size() == 0)
         return;

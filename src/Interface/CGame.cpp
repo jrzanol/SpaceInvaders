@@ -22,6 +22,10 @@ void CGame::Initialize()
     // Load Models.
     CModel* player = CWindow::CreateModel(0, "Mesh/Player.obj");
 
+    // Load Stars.
+    for (int i = 0; i < 100; ++i)
+        CWindow::CreateModel(5, "Mesh/Star.obj");
+
     // Pre-Load Enemy Models.
     CModel::LoadModel("Mesh/Enemy.obj", false);
     CModel::LoadModel("Mesh/Enemy2.obj", false);
@@ -87,25 +91,47 @@ void CGame::ProcessMiliSecTimer()
 
         if (it->m_ModelType >= 1 && it->m_ModelType <= 3)
         { // Inimigos.
-            if (newPos.z < -10.f && !it->m_StopMovement)
+            float movPerFrame = (10.f * g_DeltaTime);
+            glm::vec3* bulletpos = CheckBulletInMyWay(pos);
+
+            if (it->m_DecisionTimer <= g_LastTime)
+                it->m_DecisionTimer = 0;
+
+            if (pos->x > -8.f && pos->x < 8.f && ((it->m_DecisionTimer == 0 || it->m_DecisionTimer > g_LastTime) && bulletpos != NULL))
             {
-                const float diff = (g_LastTime - it->m_SpawnTime);
-                if (diff > 0.f)
+                if (it->m_DecisionTimer == 0)
                 {
-                    newPos.z = (it->m_InitPosition.z + (10.f * diff));
+                    it->m_DecisionTimer = g_LastTime + 6.f;
 
-                    if (newPos.z > -10.f)
-                        newPos.z = -10.f;
-
-                    if (CheckMovement(newPos, it) == NULL)
-                        *pos = newPos;
+                    if (bulletpos->x > pos->x)
+                        it->m_DecisionOp = true;
                     else
-                        it->m_StopMovement = true;
+                        it->m_DecisionOp = false;
+                }
+
+                if (it->m_DecisionOp)
+                    movPerFrame = -movPerFrame;
+
+                if ((g_LastTime - it->m_DecisionTimer) < 3.f)
+                {
+                    newPos.x = (pos->x + movPerFrame);
+
+                    if (newPos.x < -8.f)
+                        newPos.x = -8.f;
+                    else if (newPos.x > 8.f)
+                        newPos.x = 8.f;
                 }
             }
+            else if (newPos.z < -10.f)
+            {
+                newPos.z = (pos->z + movPerFrame);
 
-            if (newPos.z < -28.f && it->m_StopMovement)
-                it->m_StopMovement = false; // Ativa novamente na parte que não é viísvel.
+                if (newPos.z > -10.f)
+                    newPos.z = -10.f;
+            }
+
+            if (*pos != newPos && CheckMovement(newPos, it) == NULL)
+                *pos = newPos;
         }
         else if (it->m_ModelType == 4)
         { // Tiros.
@@ -114,9 +140,9 @@ void CGame::ProcessMiliSecTimer()
                 const float diff = (g_LastTime - it->m_SpawnTime);
                 if (diff > 0.f)
                 {
-                    pos->z = (it->m_InitPosition.z - (20.f * diff));
+                    pos->z = (it->m_InitPosition.z - (50.f * diff));
 
-                    CModel* enemy = CheckMovement(*pos);
+                    CModel* enemy = CheckBulletAttack(*pos);
                     if (enemy != NULL)
                     {
                         CModel::DeleteModel(it);
@@ -142,6 +168,30 @@ void CGame::ProcessSecTimer()
         CWindow::CreateModel(3, "Mesh/Enemy3.obj");
 }
 
+glm::vec3* CGame::CheckBulletInMyWay(const glm::vec3* pos)
+{
+    for (int Id = 1; Id < MAX_OBJECT; ++Id)
+    {
+        CModel* it = CModel::GetModel(Id);
+
+        if (!it || it->m_ModelType != 4)
+            continue; // Bullet only.
+
+        glm::vec3* enemypos = it->GetPosition();
+
+        if ((abs(enemypos->z) - abs(pos->z)) >= 0.5f)
+            continue; // Vision Field.
+
+        float minx = (enemypos->x - 1.0f);
+        float maxx = (enemypos->x + 1.0f);
+
+        if (pos->x > minx && pos->x < maxx)
+            return enemypos;
+    }
+
+    return NULL;
+}
+
 CModel* CGame::CheckMovement(glm::vec3 newPosition, CModel* thisModel)
 {
     for (int Id = 1; Id < MAX_OBJECT; ++Id)
@@ -153,8 +203,31 @@ CModel* CGame::CheckMovement(glm::vec3 newPosition, CModel* thisModel)
 
         glm::vec3* pos = it->GetPosition();
 
-        float minx = (pos->x - 1.0f);
-        float maxx = (pos->x + 1.0f);
+        float minx = (pos->x - 1.5f);
+        float maxx = (pos->x + 1.5f);
+        float minz = (pos->z - 2.2f);
+        float maxz = (pos->z + 2.2f);
+
+        if (newPosition.x > minx && newPosition.x < maxx && newPosition.z >= minz && newPosition.z <= maxz)
+            return it;
+    }
+
+    return NULL;
+}
+
+CModel* CGame::CheckBulletAttack(glm::vec3 newPosition, CModel* thisModel)
+{
+    for (int Id = 1; Id < MAX_OBJECT; ++Id)
+    {
+        CModel* it = CModel::GetModel(Id);
+
+        if (!it || it == thisModel || it->m_ModelType == 0 || it->m_ModelType >= 4)
+            continue;
+
+        glm::vec3* pos = it->GetPosition();
+
+        float minx = (pos->x - 1.f);
+        float maxx = (pos->x + 1.f);
         float minz = (pos->z - 2.f);
         float maxz = (pos->z + 2.f);
 
@@ -164,3 +237,4 @@ CModel* CGame::CheckMovement(glm::vec3 newPosition, CModel* thisModel)
 
     return NULL;
 }
+
