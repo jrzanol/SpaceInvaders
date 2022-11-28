@@ -135,8 +135,13 @@ bool CWindow::Render()
     ImGui::NewFrame();
 
     // Create ImGui Sliders.
-    ImGui::Begin("Editor");
-        ImGui::Text("Modelo:");
+    ImGui::Begin("Space Invaders");
+        if (ImGui::Button("Iniciar Novo Jogo"))
+        {
+            CModel::DeleteAllModel();
+            m_Game.Initialize();
+        }
+
         //ImGui::RadioButton("Arrastar Vertices/Triangulos", &CUtil::m_EditorType, 0);
         //ImGui::RadioButton("Criar Vertices", &CUtil::m_EditorType, 1);
         //ImGui::RadioButton("Remover Vertices", &CUtil::m_EditorType, 2);
@@ -200,6 +205,12 @@ CModel* CWindow::CreateModel(int type, const char* fileModel)
 
                 m->m_Scale = glm::vec3(0.03f, 0.f, 0.05f);
                 newPosition = glm::vec3(x, -5.f, -z);
+
+                *m->GetPosition() = newPosition;
+            }
+            else if (type == 6)
+            { // Enemy Bullets.
+                m->m_Scale = glm::vec3(0.05f, 0.f, 0.5f);
 
                 *m->GetPosition() = newPosition;
             }

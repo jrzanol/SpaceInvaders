@@ -5,9 +5,9 @@
 #include "CWindow.h"
 #include "CGame.h"
 
-//static const int g_StarsPosition[][2] = {
-//
-//};
+#include <Windows.h>
+
+bool CGame::m_GameOver = false;
 
 CGame::CGame() : CEvent()
 {
@@ -19,6 +19,9 @@ CGame::~CGame()
 
 void CGame::Initialize()
 {
+    m_Points = 0;
+    m_GameOver = false;
+
     // Load Models.
     CModel* player = CWindow::CreateModel(0, "Mesh/Player.obj");
 
@@ -36,6 +39,9 @@ void CGame::ProcessInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
+    if (m_GameOver)
+        return;
 
     CModel* pl = CModel::GetModel(0);
     if (pl)
@@ -71,6 +77,9 @@ void CGame::ProcessInput(GLFWwindow* window)
 
 void CGame::ProcessMouseButtonEvent(GLFWwindow* window, int button, int action, int mods)
 {
+    if (m_GameOver)
+        return;
+
     if (button == GLFW_MOUSE_BUTTON_LEFT)
     {
         if (action == GLFW_PRESS)
@@ -80,6 +89,9 @@ void CGame::ProcessMouseButtonEvent(GLFWwindow* window, int button, int action, 
 
 void CGame::ProcessMiliSecTimer()
 {
+    if (m_GameOver)
+        return;
+
     for (int Id = 1; Id < MAX_OBJECT; ++Id)
     {
         CModel* it = CModel::GetModel(Id);
@@ -97,7 +109,19 @@ void CGame::ProcessMiliSecTimer()
             if (it->m_DecisionTimer <= g_LastTime)
                 it->m_DecisionTimer = 0;
 
-            if (pos->x > -8.f && pos->x < 8.f && ((it->m_DecisionTimer == 0 || it->m_DecisionTimer > g_LastTime) && bulletpos != NULL))
+            if (newPos.z >= -10.f && abs(abs(pos->x) - abs(CModel::GetModel(0)->GetPosition()->x)) < 2 && it->m_LastAttackTimer < g_LastTime)
+            {
+                CModel* bull = CWindow::CreateModel(6, "Mesh/Bullet.obj");
+                if (bull)
+                {
+                    *bull->GetPosition() = *pos;
+                    bull->GetPosition()->z += 1.5f;
+                    bull->m_InitPosition = *bull->GetPosition();
+
+                    it->m_LastAttackTimer = g_LastTime + 2.f;
+                }
+            }
+            else if (pos->x > -8.f && pos->x < 8.f && ((it->m_DecisionTimer == 0 || it->m_DecisionTimer > g_LastTime) && bulletpos != NULL))
             {
                 if (it->m_DecisionTimer == 0)
                 {
@@ -145,8 +169,34 @@ void CGame::ProcessMiliSecTimer()
                     CModel* enemy = CheckBulletAttack(*pos);
                     if (enemy != NULL)
                     {
+                        m_Points += (50 * it->m_ModelType);
+
                         CModel::DeleteModel(it);
                         CModel::DeleteModel(enemy);
+                    }
+                }
+            }
+            else
+                CModel::DeleteModel(it);
+        }
+        else if (it->m_ModelType == 6)
+        { // Tiros.
+            if (newPos.z < 2.f)
+            {
+                const float diff = (g_LastTime - it->m_SpawnTime);
+                if (diff > 0.f)
+                {
+                    pos->z = (it->m_InitPosition.z + (5.f * diff));
+
+                    CModel* enemy = CheckBulletAttack(*pos, NULL, true);
+                    if (enemy != NULL)
+                    {
+                        m_GameOver = true;
+
+                        char str[128];
+                        sprintf(str, "Game Over!! Pontuação de %d.", m_Points);
+
+                        MessageBox(NULL, str, "Game Over", MB_OK);
                     }
                 }
             }
@@ -159,6 +209,9 @@ void CGame::ProcessMiliSecTimer()
 // Tem que limitar o nascimento de inimigos.
 void CGame::ProcessSecTimer()
 {
+    if (m_GameOver)
+        return;
+
     int _rand = (rand() % 3);
     if (_rand == 0)
         CWindow::CreateModel(1, "Mesh/Enemy.obj");
@@ -215,13 +268,18 @@ CModel* CGame::CheckMovement(glm::vec3 newPosition, CModel* thisModel)
     return NULL;
 }
 
-CModel* CGame::CheckBulletAttack(glm::vec3 newPosition, CModel* thisModel)
+CModel* CGame::CheckBulletAttack(glm::vec3 newPosition, CModel* thisModel, bool isEnemy)
 {
-    for (int Id = 1; Id < MAX_OBJECT; ++Id)
+    for (int Id = 0; Id < MAX_OBJECT; ++Id)
     {
         CModel* it = CModel::GetModel(Id);
 
-        if (!it || it == thisModel || it->m_ModelType == 0 || it->m_ModelType >= 4)
+        if (!it || it == thisModel || it->m_ModelType >= 4)
+            continue;
+
+        if (isEnemy && it->m_ModelType != 0)
+            continue;
+        else if (!isEnemy && it->m_ModelType == 0)
             continue;
 
         glm::vec3* pos = it->GetPosition();

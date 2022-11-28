@@ -6,6 +6,7 @@
 #include "CUtil.h"
 #include "CModel.h"
 
+int CModel::listCounter = 0;
 CModel CModel::g_List[MAX_OBJECT];
 
 CModel::CModel()
@@ -59,8 +60,6 @@ CModel* CModel::GetModel(int Id)
 
 CModel* CModel::LoadModel(std::string file, bool spawn)
 {
-    static int listCounter = 0;
-
     if (listCounter >= MAX_OBJECT || g_List[listCounter].m_Atived)
     {
         if (listCounter >= MAX_OBJECT)
@@ -110,6 +109,14 @@ void CModel::DeleteModel(CModel* m)
 
     int Id = ((unsigned int)m - (unsigned int)g_List) / sizeof(CModel);
     g_List[Id].m_Atived = false;
+}
+
+void CModel::DeleteAllModel()
+{
+    listCounter = 0;
+
+    for (int Id = 0; Id < MAX_OBJECT; ++Id)
+        g_List[Id].m_Atived = false;
 }
 
 // processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).

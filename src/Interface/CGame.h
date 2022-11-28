@@ -19,8 +19,13 @@ public:
 	void ProcessMiliSecTimer();
 	void ProcessSecTimer();
 
+	static bool m_GameOver;
+
 	static glm::vec3* CheckBulletInMyWay(const glm::vec3*);
 	static CModel* CheckMovement(glm::vec3, CModel* = NULL);
-	static CModel* CheckBulletAttack(glm::vec3, CModel* = NULL);
+	static CModel* CheckBulletAttack(glm::vec3, CModel* = NULL, bool = false);
+
+private:
+	int m_Points;
 };
 

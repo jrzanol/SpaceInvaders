@@ -30,10 +30,12 @@ public:
 
 	bool m_DecisionOp;
 	float m_DecisionTimer;
+	float m_LastAttackTimer;
 
 	static CModel* GetModel(int);
 	static CModel* LoadModel(std::string, bool = true);
 	static void DeleteModel(CModel*);
+	static void DeleteAllModel();
 
 private:
 	bool m_Atived;
@@ -42,6 +44,7 @@ private:
 	void ProcessModelNode(aiNode*, const aiScene*);
 	CMesh* ProcessModelMesh(aiMesh*, const aiScene*);
 
+	static int listCounter;
 	static CModel g_List[MAX_OBJECT];
 };
 
