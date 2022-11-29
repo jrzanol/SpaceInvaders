@@ -27,7 +27,7 @@ bool CWindow::Initialize()
         return false;
 
     /* Create a windowed mode window and its OpenGL context */
-    g_Window = glfwCreateWindow(g_WindowMaxX, g_WindowMaxY, "cg", NULL, NULL);
+    g_Window = glfwCreateWindow(g_WindowMaxX, g_WindowMaxY, "Space Invaders", NULL, NULL);
     if (!g_Window)
     {
         glfwTerminate();
@@ -141,6 +141,10 @@ bool CWindow::Render()
             CModel::DeleteAllModel();
             m_Game.Initialize();
         }
+
+        ImGui::NewLine();
+        ImGui::Text("Movimentacao: W/A/S/D");
+        ImGui::Text("Tiro: Mouse");
 
         ImGui::NewLine();
         ImGui::Text("Desenvolvido por:");

@@ -196,7 +196,7 @@ void CGame::ProcessMiliSecTimer()
                         char str[128];
                         sprintf(str, "Game Over!! Pontuação de %d.", m_Points);
 
-                        MessageBox(NULL, str, "Game Over", MB_OK);
+                        MessageBox(FindWindow(NULL, "Space Invaders"), str, "Game Over", MB_OK);
                     }
                 }
             }
