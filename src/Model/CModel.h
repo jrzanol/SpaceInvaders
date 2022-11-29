@@ -5,7 +5,7 @@
 
 #include "CMesh.h"
 
-const int MAX_OBJECT = 256;
+const int MAX_OBJECT = 512;
 
 class CModel
 {

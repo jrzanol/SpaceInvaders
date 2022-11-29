@@ -26,7 +26,7 @@ void CGame::Initialize()
     CModel* player = CWindow::CreateModel(0, "Mesh/Player.obj");
 
     // Load Stars.
-    for (int i = 0; i < 100; ++i)
+    for (int i = 0; i < 256; ++i)
         CWindow::CreateModel(5, "Mesh/Star.obj");
 
     // Pre-Load Enemy Models.
@@ -286,8 +286,8 @@ CModel* CGame::CheckBulletAttack(glm::vec3 newPosition, CModel* thisModel, bool 
 
         float minx = (pos->x - 1.f);
         float maxx = (pos->x + 1.f);
-        float minz = (pos->z - 2.f);
-        float maxz = (pos->z + 2.f);
+        float minz = (pos->z - 1.2f);
+        float maxz = (pos->z + 1.2f);
 
         if (newPosition.x > minx && newPosition.x < maxx && newPosition.z >= minz && newPosition.z <= maxz)
             return it;

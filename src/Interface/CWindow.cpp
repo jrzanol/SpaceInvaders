@@ -142,6 +142,10 @@ bool CWindow::Render()
             m_Game.Initialize();
         }
 
+        ImGui::NewLine();
+        ImGui::Text("Desenvolvido por:");
+        ImGui::Text("Junior Zanol");
+
         //ImGui::RadioButton("Arrastar Vertices/Triangulos", &CUtil::m_EditorType, 0);
         //ImGui::RadioButton("Criar Vertices", &CUtil::m_EditorType, 1);
         //ImGui::RadioButton("Remover Vertices", &CUtil::m_EditorType, 2);
@@ -200,11 +204,11 @@ CModel* CWindow::CreateModel(int type, const char* fileModel)
             }
             else if (type == 5)
             { // Stars.
-                float x = ((rand() % 20000) - 10000) / 1000.f;
-                float z = ((rand() % 30000) - 1000) / 1000.f;
+                float x = ((rand() % 30000) - 10000) / 1000.f;
+                float z = ((rand() % 50000) - 1000) / 1000.f;
 
                 m->m_Scale = glm::vec3(0.03f, 0.f, 0.05f);
-                newPosition = glm::vec3(x, -5.f, -z);
+                newPosition = glm::vec3(x, ((rand() % 20) *  - 5.f), -z);
 
                 *m->GetPosition() = newPosition;
             }
