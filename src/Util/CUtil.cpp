@@ -6,6 +6,8 @@
 
 GLFWwindow* g_Window = NULL;
 
+unsigned int g_FPS = 0;
+
 float g_DeltaTime = 0;
 float g_LastTime = 0;
 

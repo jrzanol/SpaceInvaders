@@ -15,6 +15,8 @@ public:
 	static bool RayIntersectsTriangle(glm::vec3, glm::vec3, glm::vec3*, glm::vec3&);
 };
 
+extern unsigned int g_FPS;
+
 extern float g_DeltaTime;
 extern float g_LastTime;
 

@@ -23,6 +23,20 @@ int main(int argc, const char* argv[])
         g_DeltaTime = currentFrame - g_LastTime;
         g_LastTime = currentFrame;
 
+        static int g_LastCountFps = 0;
+        static int g_LastSecFps = -1;
+        int secFps = (int)g_LastTime;
+
+        if (g_LastSecFps != secFps)
+        {
+            g_LastSecFps = secFps;
+            g_FPS = g_LastCountFps;
+
+            g_LastCountFps = 0;
+        }
+
+        g_LastCountFps++;
+
         for (const auto& it : *g_EventList)
             it->ProcessMiliSecTimer();
 

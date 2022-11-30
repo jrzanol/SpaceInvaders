@@ -36,7 +36,7 @@ bool CWindow::Initialize()
 
     /* Make the window's context current */
     glfwMakeContextCurrent(g_Window);
-    glfwSwapInterval(1); // Enable vsync
+    glfwSwapInterval(0); // Disable vsync
 
     ::CEvent::Initialize();
 
@@ -149,6 +149,10 @@ bool CWindow::Render()
         ImGui::NewLine();
         ImGui::Text("Desenvolvido por:");
         ImGui::Text("Junior Zanol");
+        ImGui::Text("jrzanol.92@gmail.com");
+
+        ImGui::NewLine();
+        ImGui::Text("FPS: %u", g_FPS);
 
         //ImGui::RadioButton("Arrastar Vertices/Triangulos", &CUtil::m_EditorType, 0);
         //ImGui::RadioButton("Criar Vertices", &CUtil::m_EditorType, 1);
