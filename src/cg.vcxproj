@@ -86,13 +86,13 @@
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>out\$(Configuration)\</IntDir>
     <IncludePath>$(SolutionDir)3rdparty\glfw-3.3.8.bin.WIN32\include;$(SolutionDir)3rdparty\imgui;$(SolutionDir)3rdparty\imgui\backends;$(SolutionDir)3rdparty\glew-2.2.0\include;$(SolutionDir)3rdparty\glm;$(SolutionDir)3rdparty\assimp\include;$(SolutionDir)src;$(SolutionDir)src\Util;$(SolutionDir)src\Model;$(SolutionDir)3rdparty\stb;$(SolutionDir)3rdparty\assimp\build\Win32\include;$(SolutionDir)src\Editor;$(SolutionDir)src\Interface;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)3rdparty\glfw-3.3.8.bin.WIN32\lib-vc2022;$(SolutionDir)3rdparty\glew-2.2.0\lib\Release\Win32;$(SolutionDir)3rdparty\assimp\build\Win32\lib\$(Configuration);$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)3rdparty\glfw-3.3.8.bin.WIN32\lib-vc2022;$(SolutionDir)3rdparty\glew-2.2.0\lib\Release\Win32;$(SolutionDir)3rdparty;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>out\$(Configuration)\</IntDir>
     <IncludePath>$(SolutionDir)3rdparty\glfw-3.3.8.bin.WIN32\include;$(SolutionDir)3rdparty\imgui;$(SolutionDir)3rdparty\imgui\backends;$(SolutionDir)3rdparty\glew-2.2.0\include;$(SolutionDir)3rdparty\glm;$(SolutionDir)3rdparty\assimp\include;$(SolutionDir)src;$(SolutionDir)src\Util;$(SolutionDir)src\Model;$(SolutionDir)3rdparty\stb;$(SolutionDir)3rdparty\assimp\build\Win32\include;$(SolutionDir)src\Editor;$(SolutionDir)src\Interface;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)3rdparty\glfw-3.3.8.bin.WIN32\lib-vc2022;$(SolutionDir)3rdparty\glew-2.2.0\lib\Release\Win32;$(SolutionDir)3rdparty\assimp\build\Win32\lib\$(Configuration);$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)3rdparty\glfw-3.3.8.bin.WIN32\lib-vc2022;$(SolutionDir)3rdparty\glew-2.2.0\lib\Release\Win32;$(SolutionDir)3rdparty;$(LibraryPath)</LibraryPath>
     <TargetName>SpaceInvaders</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -108,7 +108,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3dll.lib;opengl32.lib;glew32.lib;assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3dll.lib;opengl32.lib;glew32.lib;assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
