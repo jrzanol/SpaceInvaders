@@ -8,6 +8,7 @@
 #include <Windows.h>
 
 bool CGame::m_GameOver = false;
+unsigned long CGame::m_Seeder = 0;
 
 CGame::CGame() : CEvent()
 {
@@ -22,17 +23,48 @@ void CGame::Initialize()
     m_Points = 0;
     m_GameOver = false;
 
-    // Load Models.
-    CModel* player = CWindow::CreateModel(0, "Mesh/Player.obj");
+    InitializeSocket("127.0.0.1", 8000);
+}
 
-    // Load Stars.
-    for (int i = 0; i < 256; ++i)
-        CWindow::CreateModel(5, "Mesh/Star.obj");
+void CGame::Process(const PacketHeader* header)
+{
+    if (header->Code == CODE_InitializeGame)
+    {
+        // Load Models.
+        CModel* player = CWindow::CreateModel(0, "Mesh/Player.obj");
 
-    // Pre-Load Enemy Models.
-    CModel::LoadModel("Mesh/Enemy.obj", false);
-    CModel::LoadModel("Mesh/Enemy2.obj", false);
-    CModel::LoadModel("Mesh/Enemy3.obj", false);
+        // Load Stars.
+        for (int i = 0; i < 256; ++i)
+            CWindow::CreateModel(5, "Mesh/Star.obj");
+
+        // Pre-Load Enemy Models.
+        CModel::LoadModel("Mesh/Enemy.obj", false);
+        CModel::LoadModel("Mesh/Enemy2.obj", false);
+        CModel::LoadModel("Mesh/Enemy3.obj", false);
+    }
+}
+
+int CGame::Rand()
+{
+/* https://github.com/lattera/freebsd/blob/master/lib/libc/stdlib/rand.c
+ * Compute x = (7^5 * x) mod (2^31 - 1)
+ * without overflowing 31 bits:
+ *      (2^31 - 1) = 127773 * (7^5) + 2836
+ * From "Random number generators: good ones are hard to find",
+ * Park and Miller, Communications of the ACM, vol. 31, no. 10,
+ * October 1988, p. 1195.
+ */
+    long hi, lo, x;
+
+    /* Must be in [1, 0x7ffffffe] range at this point. */
+    hi = m_Seeder / 127773;
+    lo = m_Seeder % 127773;
+    x = 16807 * lo - 2836 * hi;
+    if (x < 0)
+        x += 0x7fffffff;
+    m_Seeder = x;
+    /* Transform to [0, 0x7ffffffd] range. */
+    return (x - 1);
 }
 
 void CGame::ProcessInput(GLFWwindow* window)
@@ -212,7 +244,7 @@ void CGame::ProcessSecTimer()
     if (m_GameOver)
         return;
 
-    int _rand = (rand() % 3);
+    int _rand = (CGame::Rand() % 3);
     if (_rand == 0)
         CWindow::CreateModel(1, "Mesh/Enemy.obj");
     else if (_rand == 1)

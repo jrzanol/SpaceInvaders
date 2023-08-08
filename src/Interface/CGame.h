@@ -5,8 +5,9 @@
 
 #include "CUtil.h"
 #include "CModel.h"
+#include "CSocket.h"
 
-class CGame : CEvent
+class CGame : CEvent, CSocket
 {
 public:
 	CGame();
@@ -18,7 +19,9 @@ public:
 	void ProcessMouseButtonEvent(GLFWwindow*, int, int, int);
 	void ProcessMiliSecTimer();
 	void ProcessSecTimer();
+	void Process(const PacketHeader*);
 
+	static int Rand();
 	static bool m_GameOver;
 
 	static glm::vec3* CheckBulletInMyWay(const glm::vec3*);
@@ -27,5 +30,7 @@ public:
 
 private:
 	int m_Points;
+
+	static unsigned long m_Seeder;
 };
 

@@ -20,7 +20,10 @@ void CLight::Draw(GLuint programId)
 {
 	if (m_Id == 0)
 	{
-		m_LightPos = *CModel::GetModel(0)->GetPosition();
+		CModel* player = CModel::GetModel(0);
+		if (player)
+			m_LightPos = *player->GetPosition();
+
 		m_LightPos.y = 1.5f;
 	}
 

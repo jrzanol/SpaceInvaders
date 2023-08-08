@@ -153,19 +153,6 @@ bool CWindow::Render()
 
         ImGui::NewLine();
         ImGui::Text("FPS: %u", g_FPS);
-
-        //ImGui::RadioButton("Arrastar Vertices/Triangulos", &CUtil::m_EditorType, 0);
-        //ImGui::RadioButton("Criar Vertices", &CUtil::m_EditorType, 1);
-        //ImGui::RadioButton("Remover Vertices", &CUtil::m_EditorType, 2);
-        //ImGui::RadioButton("Mover Objetos", &CUtil::m_EditorType, 3);
-        //ImGui::RadioButton("Criar Curva", &CUtil::m_EditorType, 4);
-        //ImGui::RadioButton("Visualizar", &CUtil::m_EditorType, 5);
-        //if (ImGui::Button("Criar Modelo #1"))
-        //    CreateModel(0, "Model/main.obj");
-        //if (ImGui::Button("Criar Modelo #2"))
-        //    CreateModel(1, "Model2/main.obj");
-        //if (ImGui::Button("Criar Modelo #3"))
-        //    CreateModel(2, "Model3/main.obj");
     ImGui::End();
 
     // Rendering the ImGui.
@@ -187,7 +174,7 @@ bool CWindow::Render()
 
 CModel* CWindow::CreateModel(int type, const char* fileModel)
 {
-    glm::vec3 newPosition = glm::vec3((-0.75f + 1.8f * (5.f - (rand() % 10))), 0.f, -30.f);
+    glm::vec3 newPosition = glm::vec3((-0.75f + 1.8f * (5.f - (CGame::Rand() % 10))), 0.f, -30.f);
 
     if (type == 4 || type == 5 || CGame::CheckMovement(newPosition) == NULL && CUtil::g_EnemyCount < 32)
     {
@@ -212,11 +199,11 @@ CModel* CWindow::CreateModel(int type, const char* fileModel)
             }
             else if (type == 5)
             { // Stars.
-                float x = ((rand() % 30000) - 10000) / 1000.f;
-                float z = ((rand() % 50000) - 1000) / 1000.f;
+                float x = ((CGame::Rand() % 30000) - 10000) / 1000.f;
+                float z = ((CGame::Rand() % 50000) - 1000) / 1000.f;
 
                 m->m_Scale = glm::vec3(0.03f, 0.f, 0.05f);
-                newPosition = glm::vec3(x, ((rand() % 20) *  - 5.f), -z);
+                newPosition = glm::vec3(x, ((CGame::Rand() % 20) *  - 5.f), -z);
 
                 *m->GetPosition() = newPosition;
             }

@@ -24,3 +24,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include <WinSock2.h>
+#include <Windows.h>
+#include <ws2tcpip.h>
+

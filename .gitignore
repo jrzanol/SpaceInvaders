@@ -33,3 +33,5 @@
 /bin/*.pdb
 /src/out
 .vs
+/src/Server/server/Debug
+/Debug

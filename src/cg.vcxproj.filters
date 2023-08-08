@@ -20,6 +20,9 @@
     <Filter Include="Game">
       <UniqueIdentifier>{881fe445-063c-4411-a0e8-91a75b79a409}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Socket">
+      <UniqueIdentifier>{e8f1c5e2-c077-4f7b-b2dc-b85a882d0860}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -73,6 +76,9 @@
     <ClCompile Include="Interface\CGame.cpp">
       <Filter>Game</Filter>
     </ClCompile>
+    <ClCompile Include="Socket\CSocket.cpp">
+      <Filter>Socket</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -104,6 +110,12 @@
     </ClInclude>
     <ClInclude Include="Interface\CGame.h">
       <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Socket\CSocket.h">
+      <Filter>Socket</Filter>
+    </ClInclude>
+    <ClInclude Include="Packetdef.h">
+      <Filter>Socket</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
