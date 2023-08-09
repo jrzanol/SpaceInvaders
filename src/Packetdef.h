@@ -6,8 +6,8 @@ struct PacketHeader
 	int Code;
 };
 
-const int CODE_InitializeGame = 1;
-struct InitializeGame
+const int CODE_MSG_InitializeGame = 1;
+struct MSG_InitializeGame
 {
 	PacketHeader Header;
 	int Seeder;

@@ -54,13 +54,15 @@ void CClient::ReadPacket()
 	}
 }
 
-void CClient::SendPacket(const void* packet, int size)
+void CClient::SendPacket(const void* packet)
 {
 	if (m_Sock != INVALID_SOCKET)
 	{
-		int ret = send(m_Sock, (char*)packet, size, 0);
-		if (ret != size)
-			printf("CClient::ProcessMiliSecTimer: Erro ao enviar pacote. ret %d size %d lastError %d.\n", ret, size, WSAGetLastError());
+		PacketHeader* header = (PacketHeader*)packet;
+
+		int ret = send(m_Sock, (char*)header, header->Size, 0);
+		if (ret != header->Size)
+			printf("CClient::ProcessMiliSecTimer: Erro ao enviar pacote. ret %d size %d lastError %d.\n", ret, header->Size, WSAGetLastError());
 	}
 }
 

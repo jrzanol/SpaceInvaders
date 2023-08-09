@@ -1,11 +1,15 @@
 
 #include "CServer.h"
 
+#include <time.h>
 #include <cstdio>
+#include <algorithm>
 
 CServer::CServer()
 {
 	m_Sock = INVALID_SOCKET;
+
+	memset(m_Game, 0, sizeof(m_Game));
 }
 
 CServer::~CServer()
@@ -108,6 +112,7 @@ bool CServer::ProcessEvent()
 	}
 
 	ProcessPacket();
+	ProcessMiliSecTimer();
 	return true;
 }
 
@@ -149,5 +154,39 @@ void CServer::ProcessPacket()
 
 void CServer::Process(CClient& conn, PacketHeader* header)
 {
+}
+
+void CServer::ProcessMiliSecTimer()
+{
+	for (int gameId = 0; gameId < (MAX_CONN / 2); ++gameId)
+	{
+		const int connId1 = gameId * 2;
+		const int connId2 = gameId * 2 + 1;
+
+		if (m_Conn[connId1].CheckConnectivity() || m_Conn[connId2].CheckConnectivity())
+		{
+			if (!m_Game[gameId].m_Alive[0] && !m_Game[gameId].m_Alive[1])
+			{
+				m_Game[gameId].m_Seeder = _time32(0);
+
+				MSG_InitializeGame ig;
+				ig.Header.Size = sizeof(MSG_InitializeGame);
+				ig.Header.Code = CODE_MSG_InitializeGame;
+				ig.Seeder = m_Game[gameId].m_Seeder;
+
+				if (m_Conn[connId1].CheckConnectivity())
+				{
+					m_Game[gameId].m_Alive[0] = true;
+					m_Conn[connId1].SendPacket(&ig);
+				}
+
+				if (m_Conn[connId2].CheckConnectivity())
+				{
+					m_Game[gameId].m_Alive[1] = true;
+					m_Conn[connId2].SendPacket(&ig);
+				}
+			}
+		}
+	}
 }
 
