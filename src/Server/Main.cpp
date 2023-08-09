@@ -6,12 +6,14 @@
 
 int main()
 {
+	Log("Iniciando o servidor...");
+
 	CServer server;
 	server.InitializeSocket("127.0.0.1", 8000);
 
-	while (server.ProcessEvent())
-		;
+	Log("Escutando em 127.0.0.1:8000.");
 
-	return 0;
+	while (server.ProcessEvent());
+	return EXIT_SUCCESS;
 }
 

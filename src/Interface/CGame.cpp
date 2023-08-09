@@ -21,15 +21,18 @@ CGame::~CGame()
 void CGame::Initialize()
 {
     m_Points = 0;
-    m_GameOver = false;
+    m_GameOver = true;
 
     InitializeSocket("127.0.0.1", 8000);
 }
 
 void CGame::Process(const PacketHeader* header)
 {
-    if (header->Code == CODE_InitializeGame)
+    if (header->Code == CODE_MSG_InitializeGame)
     {
+        MSG_InitializeGame* ig = (MSG_InitializeGame*)header;
+        m_Seeder = ig->Seeder;
+
         // Load Models.
         CModel* player = CWindow::CreateModel(0, "Mesh/Player.obj");
 
@@ -41,6 +44,8 @@ void CGame::Process(const PacketHeader* header)
         CModel::LoadModel("Mesh/Enemy.obj", false);
         CModel::LoadModel("Mesh/Enemy2.obj", false);
         CModel::LoadModel("Mesh/Enemy3.obj", false);
+
+        m_GameOver = false;
     }
 }
 
@@ -121,6 +126,9 @@ void CGame::ProcessMouseButtonEvent(GLFWwindow* window, int button, int action, 
 
 void CGame::ProcessMiliSecTimer()
 {
+    ReadPacket();
+    ProcessPacket();
+
     if (m_GameOver)
         return;
 

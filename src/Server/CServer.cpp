@@ -86,7 +86,10 @@ bool CServer::InitializeSocket(const char* ip, unsigned short port)
 
 bool CServer::ProcessEvent()
 {
-	SOCKET sock = accept(m_Sock, NULL, NULL);
+	sockaddr_in connAddr;
+	socklen_t connAddrSize = sizeof(sockaddr_in);
+
+	SOCKET sock = accept(m_Sock, (sockaddr*)&connAddr, &connAddrSize);
 	if (sock == INVALID_SOCKET)
 	{
 		if (WSAGetLastError() != WSAEWOULDBLOCK)
@@ -106,10 +109,17 @@ bool CServer::ProcessEvent()
 			{
 				m_Conn[connId].Initialize();
 				m_Conn[connId].m_Sock = sock;
+				m_Conn[connId].m_Addr = connAddr;
+				m_Conn[connId].m_GameId = connId / 2;
+
+				Log("Cliente %s:%d na sala %d conectou.", inet_ntoa(connAddr.sin_addr), ntohs(connAddr.sin_port), connId / 2);
 				break;
 			}
 		}
 	}
+
+	for (auto& it : m_Conn)
+		it.ReadPacket();
 
 	ProcessPacket();
 	ProcessMiliSecTimer();
@@ -185,8 +195,12 @@ void CServer::ProcessMiliSecTimer()
 					m_Game[gameId].m_Alive[1] = true;
 					m_Conn[connId2].SendPacket(&ig);
 				}
+
+				Log("Novo jogo gerado na sala %d, com seeder %d.", gameId, m_Game[gameId].m_Seeder);
 			}
 		}
+		else
+			memset(&m_Game[gameId], 0, sizeof(stGame));
 	}
 }
 

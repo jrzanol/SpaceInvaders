@@ -40,10 +40,7 @@ void CClient::ReadPacket()
 		{
 			if (WSAGetLastError() != WSAEWOULDBLOCK)
 			{
-				if (len == 0)
-					printf("CClient::ProcessMiliSecTimer: Desconectado pelo servidor.\n");
-				else
-					printf("CClient::ProcessMiliSecTimer: Erro ao receber pacote. len %d size %d lastError %d.\n", len, m_ReadCounter, WSAGetLastError());
+				Log("Cliente %s:%d da sala %d desconectou.", inet_ntoa(m_Addr.sin_addr), ntohs(m_Addr.sin_port), m_GameId);
 
 				closesocket(m_Sock);
 				m_Sock = INVALID_SOCKET;
