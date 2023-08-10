@@ -12,6 +12,10 @@ unsigned long CGame::m_Seeder = 0;
 
 CGame::CGame() : CEvent()
 {
+    m_Points = 0;
+    m_GameOver = true;
+
+    InitializeSocket("127.0.0.1", 8000);
 }
 
 CGame::~CGame()
@@ -23,7 +27,11 @@ void CGame::Initialize()
     m_Points = 0;
     m_GameOver = true;
 
-    InitializeSocket("127.0.0.1", 8000);
+    MSG_RequestInitializeGame ri;
+    ri.Header.Size = sizeof(MSG_RequestInitializeGame);
+    ri.Header.Code = CODE_MSG_RequestInitializeGame;
+
+    SendPacket(&ri);
 }
 
 void CGame::Process(const PacketHeader* header)
@@ -32,6 +40,9 @@ void CGame::Process(const PacketHeader* header)
     {
         MSG_InitializeGame* ig = (MSG_InitializeGame*)header;
         m_Seeder = ig->Seeder;
+
+        m_Points = 0;
+        CModel::DeleteAllModel();
 
         // Load Models.
         CModel* player = CWindow::CreateModel(0, "Mesh/Player.obj");
@@ -128,6 +139,7 @@ void CGame::ProcessMiliSecTimer()
 {
     ReadPacket();
     ProcessPacket();
+    WritePacket();
 
     if (m_GameOver)
         return;
@@ -149,7 +161,7 @@ void CGame::ProcessMiliSecTimer()
             if (it->m_DecisionTimer <= g_LastTime)
                 it->m_DecisionTimer = 0;
 
-            if (newPos.z >= -10.f && abs(abs(pos->x) - abs(CModel::GetModel(0)->GetPosition()->x)) < 2 && it->m_LastAttackTimer < g_LastTime)
+            if (newPos.z >= -10.f && it->m_LastAttackTimer < g_LastTime)
             {
                 CModel* bull = CWindow::CreateModel(6, "Mesh/Bullet.obj");
                 if (bull)
@@ -158,34 +170,34 @@ void CGame::ProcessMiliSecTimer()
                     bull->GetPosition()->z += 1.5f;
                     bull->m_InitPosition = *bull->GetPosition();
 
-                    it->m_LastAttackTimer = g_LastTime + 2.f;
+                    it->m_LastAttackTimer = g_LastTime + 5.f;
                 }
             }
-            else if (pos->x > -8.f && pos->x < 8.f && ((it->m_DecisionTimer == 0 || it->m_DecisionTimer > g_LastTime) && bulletpos != NULL))
-            {
-                if (it->m_DecisionTimer == 0)
-                {
-                    it->m_DecisionTimer = g_LastTime + 6.f;
+            //else if (pos->x > -8.f && pos->x < 8.f && ((it->m_DecisionTimer == 0 || it->m_DecisionTimer > g_LastTime) && bulletpos != NULL))
+            //{ // Desvio dos tiros pelos inimigos.
+            //    if (it->m_DecisionTimer == 0)
+            //    {
+            //        it->m_DecisionTimer = g_LastTime + 6.f;
 
-                    if (bulletpos->x > pos->x)
-                        it->m_DecisionOp = true;
-                    else
-                        it->m_DecisionOp = false;
-                }
+            //        if (bulletpos->x > pos->x)
+            //            it->m_DecisionOp = true;
+            //        else
+            //            it->m_DecisionOp = false;
+            //    }
 
-                if (it->m_DecisionOp)
-                    movPerFrame = -movPerFrame;
+            //    if (it->m_DecisionOp)
+            //        movPerFrame = -movPerFrame;
 
-                if ((g_LastTime - it->m_DecisionTimer) < 3.f)
-                {
-                    newPos.x = (pos->x + movPerFrame);
+            //    if ((g_LastTime - it->m_DecisionTimer) < 3.f)
+            //    {
+            //        newPos.x = (pos->x + movPerFrame);
 
-                    if (newPos.x < -8.f)
-                        newPos.x = -8.f;
-                    else if (newPos.x > 8.f)
-                        newPos.x = 8.f;
-                }
-            }
+            //        if (newPos.x < -8.f)
+            //            newPos.x = -8.f;
+            //        else if (newPos.x > 8.f)
+            //            newPos.x = 8.f;
+            //    }
+            //}
             else if (newPos.z < -10.f)
             {
                 newPos.z = (pos->z + movPerFrame);

@@ -82,8 +82,6 @@ bool CWindow::Initialize()
 
     std::cout << "Carregando os modelos...\n";
 
-    m_Game.Initialize();
-
     // Configure the Lines.
     glLineWidth(2.f);
     glEnable(GL_LINE_SMOOTH);
@@ -137,10 +135,7 @@ bool CWindow::Render()
     // Create ImGui Sliders.
     ImGui::Begin("Space Invaders");
         if (ImGui::Button("Iniciar Novo Jogo"))
-        {
-            CModel::DeleteAllModel();
             m_Game.Initialize();
-        }
 
         ImGui::NewLine();
         ImGui::Text("Movimentacao: W/A/S/D");
@@ -176,7 +171,7 @@ CModel* CWindow::CreateModel(int type, const char* fileModel)
 {
     glm::vec3 newPosition = glm::vec3((-0.75f + 1.8f * (5.f - (CGame::Rand() % 10))), 0.f, -30.f);
 
-    if (type == 4 || type == 5 || CGame::CheckMovement(newPosition) == NULL && CUtil::g_EnemyCount < 32)
+    if (type == 4 || type == 5 || (CGame::CheckMovement(newPosition) == NULL && CUtil::g_EnemyCount < 32))
     {
         CModel* m = CModel::LoadModel(fileModel);
         if (m)

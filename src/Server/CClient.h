@@ -26,6 +26,8 @@ public:
 
 	SOCKET m_Sock;
 	sockaddr_in m_Addr;
+
+	int m_ConnId;
 	int m_GameId;
 
 	// Socket functions:

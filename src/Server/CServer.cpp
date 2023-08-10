@@ -105,11 +105,15 @@ bool CServer::ProcessEvent()
 	{
 		for (int connId = 0; connId < MAX_CONN; ++connId)
 		{
+			if (m_Game[connId / 2].m_Alive[0] || m_Game[connId / 2].m_Alive[1])
+				continue; // A Sala já está ocorrendo um jogo.
+
 			if (m_Conn[connId].m_Sock == INVALID_SOCKET)
 			{
 				m_Conn[connId].Initialize();
 				m_Conn[connId].m_Sock = sock;
 				m_Conn[connId].m_Addr = connAddr;
+				m_Conn[connId].m_ConnId = connId;
 				m_Conn[connId].m_GameId = connId / 2;
 
 				Log("Cliente %s:%d na sala %d conectou.", inet_ntoa(connAddr.sin_addr), ntohs(connAddr.sin_port), connId / 2);
@@ -164,6 +168,79 @@ void CServer::ProcessPacket()
 
 void CServer::Process(CClient& conn, PacketHeader* header)
 {
+	if (header->Code == CODE_MSG_RequestInitializeGame)
+	{ // Inicia um novo jogo.
+		int gameId = conn.m_GameId;
+		int connId1 = conn.m_ConnId;
+		int connId2 = conn.m_ConnId;
+
+		if ((connId1 % 2) == 1)
+			connId1--;
+		else
+			connId2++;
+
+		if ((m_Conn[connId1].CheckConnectivity() ^ m_Conn[connId2].CheckConnectivity()) != 0)
+		{ // Reagrupa as salas, caso estiver somente com 1 jogador.
+			int otherGameId;
+			for (otherGameId = 0; otherGameId < MAX_CONN / 2; ++otherGameId)
+			{
+				if (gameId == otherGameId)
+					continue;
+
+				if ((m_Conn[otherGameId].CheckConnectivity() ^ m_Conn[otherGameId + 1].CheckConnectivity()) != 0)
+				{
+					if (!m_Conn[connId1].CheckConnectivity())
+					{
+						if (m_Conn[otherGameId].CheckConnectivity())
+							std::swap(m_Conn[connId1], m_Conn[otherGameId]);
+						else
+							std::swap(m_Conn[connId1], m_Conn[otherGameId + 1]);
+
+						m_Conn[connId1].m_ConnId = connId1;
+						m_Conn[connId1].m_GameId = gameId;
+					}
+					else
+					{
+						if (m_Conn[otherGameId].CheckConnectivity())
+							std::swap(m_Conn[connId2], m_Conn[otherGameId]);
+						else
+							std::swap(m_Conn[connId2], m_Conn[otherGameId + 1]);
+
+						m_Conn[connId2].m_ConnId = connId2;
+						m_Conn[connId2].m_GameId = gameId;
+					}
+				}
+			}
+		}
+
+		m_Game[gameId].m_Seeder = _time32(0);
+
+		MSG_InitializeGame ig;
+		ig.Header.Size = sizeof(MSG_InitializeGame);
+		ig.Header.Code = CODE_MSG_InitializeGame;
+		ig.Seeder = m_Game[gameId].m_Seeder;
+		ig.Count = 0;
+
+		if (m_Conn[connId1].CheckConnectivity())
+			ig.Count++;
+
+		if (m_Conn[connId2].CheckConnectivity())
+			ig.Count++;
+
+		if (m_Conn[connId1].CheckConnectivity())
+		{
+			m_Game[gameId].m_Alive[0] = true;
+			m_Conn[connId1].SendPacket(&ig);
+		}
+
+		if (m_Conn[connId2].CheckConnectivity())
+		{
+			m_Game[gameId].m_Alive[1] = true;
+			m_Conn[connId2].SendPacket(&ig);
+		}
+
+		Log("Novo jogo gerado na sala %d, com seeder %d.", gameId, m_Game[gameId].m_Seeder);
+	}
 }
 
 void CServer::ProcessMiliSecTimer()
@@ -175,29 +252,6 @@ void CServer::ProcessMiliSecTimer()
 
 		if (m_Conn[connId1].CheckConnectivity() || m_Conn[connId2].CheckConnectivity())
 		{
-			if (!m_Game[gameId].m_Alive[0] && !m_Game[gameId].m_Alive[1])
-			{
-				m_Game[gameId].m_Seeder = _time32(0);
-
-				MSG_InitializeGame ig;
-				ig.Header.Size = sizeof(MSG_InitializeGame);
-				ig.Header.Code = CODE_MSG_InitializeGame;
-				ig.Seeder = m_Game[gameId].m_Seeder;
-
-				if (m_Conn[connId1].CheckConnectivity())
-				{
-					m_Game[gameId].m_Alive[0] = true;
-					m_Conn[connId1].SendPacket(&ig);
-				}
-
-				if (m_Conn[connId2].CheckConnectivity())
-				{
-					m_Game[gameId].m_Alive[1] = true;
-					m_Conn[connId2].SendPacket(&ig);
-				}
-
-				Log("Novo jogo gerado na sala %d, com seeder %d.", gameId, m_Game[gameId].m_Seeder);
-			}
 		}
 		else
 			memset(&m_Game[gameId], 0, sizeof(stGame));

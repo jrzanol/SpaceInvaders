@@ -9,7 +9,7 @@ protected:
 	CSocket();
 	~CSocket();
 
-	void SendPacket(const void*, int);
+	void SendPacket(const void*);
 	bool CheckConnectivity() const { return m_Sock != INVALID_SOCKET; }
 
 	int m_ReadCounter;

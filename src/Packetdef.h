@@ -11,4 +11,12 @@ struct MSG_InitializeGame
 {
 	PacketHeader Header;
 	int Seeder;
+	int Count;
 };
+
+const int CODE_MSG_RequestInitializeGame = 2;
+struct MSG_RequestInitializeGame
+{
+	PacketHeader Header;
+};
+

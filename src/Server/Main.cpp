@@ -13,7 +13,9 @@ int main()
 
 	Log("Escutando em 127.0.0.1:8000.");
 
-	while (server.ProcessEvent());
+	while (server.ProcessEvent())
+		Sleep(10);
+
 	return EXIT_SUCCESS;
 }
 
