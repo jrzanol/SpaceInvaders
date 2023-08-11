@@ -7,6 +7,7 @@
 
 #include <Windows.h>
 
+bool CGame::m_IsDead = false;
 bool CGame::m_GameOver = false;
 unsigned long CGame::m_Seeder = 0;
 int CGame::m_PlayerCount = 0;
@@ -16,6 +17,7 @@ int CGame::m_PlayerMyId = 0;
 CGame::CGame() : CEvent()
 {
     m_Points = 0;
+    m_IsDead = true;
     m_GameOver = true;
 
     InitializeSocket("127.0.0.1", 8000);
@@ -30,6 +32,7 @@ void CGame::Initialize()
     m_Points = 0;
     m_PlayerCount = 0;
     m_PlayerCounter = 0;
+    m_IsDead = true;
     m_GameOver = true;
 
     MSG_RequestInitializeGame ri;
@@ -44,8 +47,8 @@ void CGame::Process(const PacketHeader* header)
     if (header->Code == CODE_MSG_InitializeGame)
     {
         MSG_InitializeGame* ig = (MSG_InitializeGame*)header;
-        m_Seeder = ig->Seeder;
-        m_PlayerCount = ig->Count;
+        m_Seeder = ig->m_Seeder;
+        m_PlayerCount = ig->m_Count;
         m_PlayerMyId = (ig->Header.ID % 2);
 
         m_Points = 0;
@@ -55,7 +58,7 @@ void CGame::Process(const PacketHeader* header)
         // Load Models.
         CWindow::CreateModel(0, "Mesh/Player.obj");
 
-        if (ig->Count == 2)
+        if (m_PlayerCount == 2)
             CWindow::CreateModel(0, "Mesh/Player.obj");
 
         // Load Stars.
@@ -67,6 +70,7 @@ void CGame::Process(const PacketHeader* header)
         CModel::LoadModel("Mesh/Enemy2.obj", false);
         CModel::LoadModel("Mesh/Enemy3.obj", false);
 
+        m_IsDead = false;
         m_GameOver = false;
     }
     else if (header->Code == CODE_MSG_Action)
@@ -84,7 +88,6 @@ void CGame::Process(const PacketHeader* header)
     else if (header->Code == CODE_MSG_Dead)
     {
         MSG_Dead* dd = (MSG_Dead*)header;
-        CModel::DeleteModel(CModel::GetModel(dd->Header.ID % 2));
 
         if (dd->m_AllIsDead)
         {
@@ -95,6 +98,19 @@ void CGame::Process(const PacketHeader* header)
 
             MessageBox(FindWindow(NULL, "Space Invaders"), str, "Game Over", MB_OK);
         }
+        else
+        {
+            CModel* player = CModel::GetModel(dd->Header.ID % 2);
+            if (player)
+                CModel::DeleteModel(player);
+        }
+    }
+    else if (header->Code == CODE_MSG_Attack)
+    {
+        MSG_Attack* aa = (MSG_Attack*)header;
+
+        glm::vec3 pos = glm::vec3(aa->m_X, aa->m_Y, aa->m_Z);
+        CWindow::CreateModel(4, "Mesh/Bullet.obj", &pos);
     }
 }
 
@@ -126,7 +142,7 @@ void CGame::ProcessInput(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-    if (m_GameOver)
+    if (m_GameOver || m_IsDead)
         return;
 
     CModel* pl = CModel::GetModel(m_PlayerMyId);
@@ -176,13 +192,23 @@ void CGame::ProcessInput(GLFWwindow* window)
 
 void CGame::ProcessMouseButtonEvent(GLFWwindow* window, int button, int action, int mods)
 {
-    if (m_GameOver)
+    if (m_GameOver || m_IsDead)
         return;
 
-    if (button == GLFW_MOUSE_BUTTON_LEFT)
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
     {
-        if (action == GLFW_PRESS)
-            CWindow::CreateModel(4, "Mesh/Bullet.obj");
+        CModel* player = CModel::GetModel(m_PlayerMyId);
+        if (player)
+        {
+            MSG_Attack aa;
+            aa.Header.Size = sizeof(MSG_Attack);
+            aa.Header.Code = CODE_MSG_Attack;
+            aa.m_X = player->GetPosition()->x;
+            aa.m_Y = player->GetPosition()->y;
+            aa.m_Z = player->GetPosition()->z;
+
+            SendPacket(&aa);
+        }
     }
 }
 
@@ -294,15 +320,18 @@ void CGame::ProcessMiliSecTimer()
                     CModel* enemy = NULL;
 
                     if (m_PlayerCount == 2)
-                        enemy = CheckBulletAttack(*pos, CModel::GetModel(m_PlayerMyId == 0 ? 1 : 0), true);//??
+                        enemy = CheckBulletAttack(*pos, CModel::GetModel(m_PlayerMyId == 0 ? 1 : 0), true);
                     else
                         enemy = CheckBulletAttack(*pos, NULL, true);
 
-                    if (enemy != NULL)
+                    if (enemy != NULL && !m_IsDead)
                     {
+                        m_IsDead = true;
+
                         MSG_Dead dd;
                         dd.Header.Size = sizeof(MSG_Dead);
-                        dd.Header.ID = CODE_MSG_Dead;
+                        dd.Header.Code = CODE_MSG_Dead;
+                        dd.Header.ID = m_PlayerMyId;
 
                         SendPacket(&dd);
                     }

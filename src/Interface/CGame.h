@@ -22,6 +22,7 @@ public:
 	void Process(const PacketHeader*);
 
 	static int Rand();
+	static bool m_IsDead;
 	static bool m_GameOver;
 	static int m_PlayerMyId;
 	static int m_PlayerCount;

@@ -63,7 +63,7 @@ CModel* CModel::LoadModel(std::string file, bool spawn)
     if (listCounter >= MAX_OBJECT || g_List[listCounter].m_Atived)
     {
         if (listCounter >= MAX_OBJECT)
-            listCounter = 0;
+            listCounter = 2;
 
         for (; listCounter < MAX_OBJECT; ++listCounter)
             if (!g_List[listCounter].m_Atived)

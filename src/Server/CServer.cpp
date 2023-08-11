@@ -218,14 +218,14 @@ void CServer::Process(CClient& conn, PacketHeader* header)
 		MSG_InitializeGame ig;
 		ig.Header.Size = sizeof(MSG_InitializeGame);
 		ig.Header.Code = CODE_MSG_InitializeGame;
-		ig.Seeder = m_Game[gameId].m_Seeder;
-		ig.Count = 0;
+		ig.m_Seeder = m_Game[gameId].m_Seeder;
+		ig.m_Count = 0;
 
 		if (m_Conn[connId1].CheckConnectivity())
-			ig.Count++;
+			ig.m_Count++;
 
 		if (m_Conn[connId2].CheckConnectivity())
-			ig.Count++;
+			ig.m_Count++;
 
 		if (m_Conn[connId1].CheckConnectivity())
 		{
@@ -261,6 +261,7 @@ void CServer::Process(CClient& conn, PacketHeader* header)
 	else if (header->Code == CODE_MSG_Dead)
 	{
 		MSG_Dead* dd = (MSG_Dead*)header;
+		dd->Header.ID = conn.m_ConnId;
 
 		int otherConnId = conn.m_ConnId;
 		if ((otherConnId % 2) == 1)
@@ -272,12 +273,25 @@ void CServer::Process(CClient& conn, PacketHeader* header)
 
 		if (!m_Game[conn.m_GameId].m_Alive[0] && !m_Game[conn.m_GameId].m_Alive[1])
 			dd->m_AllIsDead = true;
+		else
+			dd->m_AllIsDead = false;
 
-		dd->Header.ID = conn.m_ConnId;
 		m_Conn[otherConnId].SendPacket(dd);
-
-		dd->Header.ID = conn.m_ConnId;
 		m_Conn[conn.m_ConnId].SendPacket(dd);
+	}
+	else if (header->Code == CODE_MSG_Attack)
+	{
+		MSG_Attack* aa = (MSG_Attack*)header;
+		aa->Header.ID = conn.m_ConnId;
+
+		int otherConnId = conn.m_ConnId;
+		if ((otherConnId % 2) == 1)
+			otherConnId--;
+		else
+			otherConnId++;
+
+		m_Conn[otherConnId].SendPacket(aa);
+		m_Conn[conn.m_ConnId].SendPacket(aa);
 	}
 }
 

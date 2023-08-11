@@ -20,7 +20,7 @@ public:
 	bool Render();
 
 	static const glm::mat4& GetVP();
-	static CModel* CreateModel(int, const char*);
+	static CModel* CreateModel(int, const char*, glm::vec3* = NULL);
 
 private:
 	CGame m_Game;
