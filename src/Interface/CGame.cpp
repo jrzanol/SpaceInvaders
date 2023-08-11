@@ -9,6 +9,9 @@
 
 bool CGame::m_GameOver = false;
 unsigned long CGame::m_Seeder = 0;
+int CGame::m_PlayerCount = 0;
+int CGame::m_PlayerCounter = 0;
+int CGame::m_PlayerMyId = 0;
 
 CGame::CGame() : CEvent()
 {
@@ -25,6 +28,8 @@ CGame::~CGame()
 void CGame::Initialize()
 {
     m_Points = 0;
+    m_PlayerCount = 0;
+    m_PlayerCounter = 0;
     m_GameOver = true;
 
     MSG_RequestInitializeGame ri;
@@ -40,12 +45,18 @@ void CGame::Process(const PacketHeader* header)
     {
         MSG_InitializeGame* ig = (MSG_InitializeGame*)header;
         m_Seeder = ig->Seeder;
+        m_PlayerCount = ig->Count;
+        m_PlayerMyId = (ig->Header.ID % 2);
 
         m_Points = 0;
+        m_PlayerCounter = 0;
         CModel::DeleteAllModel();
 
         // Load Models.
-        CModel* player = CWindow::CreateModel(0, "Mesh/Player.obj");
+        CWindow::CreateModel(0, "Mesh/Player.obj");
+
+        if (ig->Count == 2)
+            CWindow::CreateModel(0, "Mesh/Player.obj");
 
         // Load Stars.
         for (int i = 0; i < 256; ++i)
@@ -57,6 +68,33 @@ void CGame::Process(const PacketHeader* header)
         CModel::LoadModel("Mesh/Enemy3.obj", false);
 
         m_GameOver = false;
+    }
+    else if (header->Code == CODE_MSG_Action)
+    {
+        MSG_Action* aa = (MSG_Action*)header;
+
+        CModel* player = CModel::GetModel(aa->Header.ID % 2);
+        if (player)
+        {
+            player->GetPosition()->x += aa->m_DiffX;
+            player->GetPosition()->y += aa->m_DiffY;
+            player->GetPosition()->z += aa->m_DiffZ;
+        }
+    }
+    else if (header->Code == CODE_MSG_Dead)
+    {
+        MSG_Dead* dd = (MSG_Dead*)header;
+        CModel::DeleteModel(CModel::GetModel(dd->Header.ID % 2));
+
+        if (dd->m_AllIsDead)
+        {
+            m_GameOver = true;
+
+            char str[128];
+            sprintf(str, "Game Over!! Pontuação de %d.", m_Points);
+
+            MessageBox(FindWindow(NULL, "Space Invaders"), str, "Game Over", MB_OK);
+        }
     }
 }
 
@@ -91,7 +129,7 @@ void CGame::ProcessInput(GLFWwindow* window)
     if (m_GameOver)
         return;
 
-    CModel* pl = CModel::GetModel(0);
+    CModel* pl = CModel::GetModel(m_PlayerMyId);
     if (pl)
     {
         glm::vec3 newPos = *pl->GetPosition();
@@ -119,7 +157,20 @@ void CGame::ProcessInput(GLFWwindow* window)
         if (newPos.z > 0.f)
             newPos.z = 0.f;
 
-        *pl->GetPosition() = newPos;
+        if (*pl->GetPosition() != newPos)
+        {
+            glm::vec3 diff = (newPos - *pl->GetPosition());
+            *pl->GetPosition() = newPos;
+
+            MSG_Action aa;
+            aa.Header.Size = sizeof(MSG_Action);
+            aa.Header.Code = CODE_MSG_Action;
+            aa.m_DiffX = diff.x;
+            aa.m_DiffY = diff.y;
+            aa.m_DiffZ = diff.z;
+
+            SendPacket(&aa);
+        }
     }
 }
 
@@ -240,15 +291,20 @@ void CGame::ProcessMiliSecTimer()
                 {
                     pos->z = (it->m_InitPosition.z + (5.f * diff));
 
-                    CModel* enemy = CheckBulletAttack(*pos, NULL, true);
+                    CModel* enemy = NULL;
+
+                    if (m_PlayerCount == 2)
+                        enemy = CheckBulletAttack(*pos, CModel::GetModel(m_PlayerMyId == 0 ? 1 : 0), true);//??
+                    else
+                        enemy = CheckBulletAttack(*pos, NULL, true);
+
                     if (enemy != NULL)
                     {
-                        m_GameOver = true;
+                        MSG_Dead dd;
+                        dd.Header.Size = sizeof(MSG_Dead);
+                        dd.Header.ID = CODE_MSG_Dead;
 
-                        char str[128];
-                        sprintf(str, "Game Over!! Pontuação de %d.", m_Points);
-
-                        MessageBox(FindWindow(NULL, "Space Invaders"), str, "Game Over", MB_OK);
+                        SendPacket(&dd);
                     }
                 }
             }

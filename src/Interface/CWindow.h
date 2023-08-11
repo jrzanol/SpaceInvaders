@@ -24,7 +24,7 @@ public:
 
 private:
 	CGame m_Game;
-	CLight m_Light;
+	CLight m_Light[2];
 	CCamera m_Camera;
 	
 	GLuint m_ProgramId;

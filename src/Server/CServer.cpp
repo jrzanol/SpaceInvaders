@@ -229,17 +229,55 @@ void CServer::Process(CClient& conn, PacketHeader* header)
 
 		if (m_Conn[connId1].CheckConnectivity())
 		{
+			ig.Header.ID = connId1;
+
 			m_Game[gameId].m_Alive[0] = true;
 			m_Conn[connId1].SendPacket(&ig);
 		}
 
 		if (m_Conn[connId2].CheckConnectivity())
 		{
+			ig.Header.ID = connId2;
+			
 			m_Game[gameId].m_Alive[1] = true;
 			m_Conn[connId2].SendPacket(&ig);
 		}
 
 		Log("Novo jogo gerado na sala %d, com seeder %d.", gameId, m_Game[gameId].m_Seeder);
+	}
+	else if (header->Code == CODE_MSG_Action)
+	{
+		MSG_Action* aa = (MSG_Action*)header;
+
+		int otherConnId = conn.m_ConnId;
+		if ((otherConnId % 2) == 1)
+			otherConnId--;
+		else
+			otherConnId++;
+
+		aa->Header.ID = conn.m_ConnId;
+		m_Conn[otherConnId].SendPacket(aa);
+	}
+	else if (header->Code == CODE_MSG_Dead)
+	{
+		MSG_Dead* dd = (MSG_Dead*)header;
+
+		int otherConnId = conn.m_ConnId;
+		if ((otherConnId % 2) == 1)
+			otherConnId--;
+		else
+			otherConnId++;
+
+		m_Game[conn.m_GameId].m_Alive[conn.m_ConnId % 2] = false;
+
+		if (!m_Game[conn.m_GameId].m_Alive[0] && !m_Game[conn.m_GameId].m_Alive[1])
+			dd->m_AllIsDead = true;
+
+		dd->Header.ID = conn.m_ConnId;
+		m_Conn[otherConnId].SendPacket(dd);
+
+		dd->Header.ID = conn.m_ConnId;
+		m_Conn[conn.m_ConnId].SendPacket(dd);
 	}
 }
 

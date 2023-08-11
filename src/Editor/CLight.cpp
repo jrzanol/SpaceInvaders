@@ -18,21 +18,25 @@ CLight::CLight()
 
 void CLight::Draw(GLuint programId)
 {
-	if (m_Id == 0)
+	CModel* player = CModel::GetModel(m_Id);
+	if (player)
 	{
-		CModel* player = CModel::GetModel(0);
+		if (player->m_ModelType != 0)
+			player = CModel::GetModel(0);
+
 		if (player)
+		{
 			m_LightPos = *player->GetPosition();
+			m_LightPos.y = 1.5f;
 
-		m_LightPos.y = 1.5f;
+			char lightPosStr[16], lightColorStr[16];
+			sprintf(lightPosStr, "lightPos%s", m_Id == 0 ? "" : std::to_string(m_Id + 1).c_str());
+			sprintf(lightColorStr, "lightColor%s", m_Id == 0 ? "" : std::to_string(m_Id + 1).c_str());
+
+			glUniform3fv(glGetUniformLocation(programId, lightPosStr), 1, glm::value_ptr(m_LightPos));
+			glUniform3fv(glGetUniformLocation(programId, lightColorStr), 1, glm::value_ptr(m_LightColor));
+		}
 	}
-
-	char lightPosStr[16], lightColorStr[16];
-	sprintf(lightPosStr, "lightPos%s", m_Id == 0 ? "" : std::to_string(m_Id + 1).c_str());
-	sprintf(lightColorStr, "lightColor%s", m_Id == 0 ? "" : std::to_string(m_Id + 1).c_str());
-
-	glUniform3fv(glGetUniformLocation(programId, lightPosStr), 1, glm::value_ptr(m_LightPos));
-	glUniform3fv(glGetUniformLocation(programId, lightColorStr), 1, glm::value_ptr(m_LightColor));
 }
 
 void CLight::ProcessMiliSecTimer()

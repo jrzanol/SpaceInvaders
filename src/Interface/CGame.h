@@ -23,6 +23,9 @@ public:
 
 	static int Rand();
 	static bool m_GameOver;
+	static int m_PlayerMyId;
+	static int m_PlayerCount;
+	static int m_PlayerCounter;
 
 	static glm::vec3* CheckBulletInMyWay(const glm::vec3*);
 	static CModel* CheckMovement(glm::vec3, CModel* = NULL);

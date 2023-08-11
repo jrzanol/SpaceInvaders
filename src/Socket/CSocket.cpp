@@ -151,5 +151,7 @@ void CSocket::SendPacket(const void* packet)
 
 	memcpy(&m_WriteBuffer[m_WriteCounter], (const unsigned char*)header, header->Size);
 	m_WriteCounter += header->Size;
+
+	WritePacket();
 }
 

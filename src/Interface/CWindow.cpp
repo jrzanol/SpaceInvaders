@@ -116,8 +116,8 @@ bool CWindow::Render()
     glUniformMatrix4fv(glGetUniformLocation(m_ProgramId, "u_vp"), 1, GL_FALSE, glm::value_ptr(m_VP));
 
     // Draw Lights.
-    //for (auto& it : m_Light)
-    m_Light.Draw(m_ProgramId);
+    for (auto& it : m_Light)
+        it.Draw(m_ProgramId);
     
     // Draw objects.
     for (unsigned int i = 0; i < MAX_OBJECT; ++i)
@@ -171,7 +171,7 @@ CModel* CWindow::CreateModel(int type, const char* fileModel)
 {
     glm::vec3 newPosition = glm::vec3((-0.75f + 1.8f * (5.f - (CGame::Rand() % 10))), 0.f, -30.f);
 
-    if (type == 4 || type == 5 || (CGame::CheckMovement(newPosition) == NULL && CUtil::g_EnemyCount < 32))
+    if (type == 0 || type == 4 || type == 5 || (CGame::CheckMovement(newPosition) == NULL && CUtil::g_EnemyCount < 32))
     {
         CModel* m = CModel::LoadModel(fileModel);
         if (m)
@@ -182,12 +182,14 @@ CModel* CWindow::CreateModel(int type, const char* fileModel)
                 
                 if (type == 1 || type == 2 || type == 3)
                     *m->GetPosition() = newPosition;
+                else if (type == 0 && CGame::m_PlayerCount == 2)
+                    *m->GetPosition() = glm::vec3(CGame::m_PlayerCounter++ == 0 ? -5.f : 5.f, 0.f, 0.f);
             }
             else if (type == 4)
             { // Bullets.
                 m->m_Scale = glm::vec3(0.05f, 0.f, 0.5f);
 
-                newPosition = *CModel::GetModel(0)->GetPosition();
+                newPosition = *CModel::GetModel(CGame::m_PlayerMyId)->GetPosition();
                 newPosition.z -= 1.5f;
 
                 *m->GetPosition() = newPosition;
