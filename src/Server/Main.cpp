@@ -8,10 +8,20 @@ int main()
 {
 	Log("Iniciando o servidor...");
 
-	CServer server;
-	server.InitializeSocket("127.0.0.1", 8000);
+	char ipAddress[32];
+	ipAddress[0] = 0;
 
-	Log("Escutando em 127.0.0.1:8000.");
+	FILE* in = fopen("serverIp.txt", "rt");
+	if (in)
+	{
+		fgets(ipAddress, sizeof(ipAddress), in);
+		fclose(in);
+	}
+
+	CServer server;
+	server.InitializeSocket(ipAddress, 8000);
+
+	Log("Escutando em %s:8000.", ipAddress);
 
 	while (server.ProcessEvent())
 		Sleep(10);

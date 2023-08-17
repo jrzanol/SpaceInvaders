@@ -24,6 +24,7 @@ public:
 	int m_ReadCurrent;
 	unsigned char m_ReadBuffer[65535];
 
+	ceState m_State;
 	SOCKET m_Sock;
 	sockaddr_in m_Addr;
 

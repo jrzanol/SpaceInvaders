@@ -113,6 +113,8 @@ void CSocket::ProcessPacket()
 {
 	if (m_Sock != INVALID_SOCKET && m_ReadCounter > 0)
 	{
+		time_t rawnow = time(0);
+
 		while (m_ReadCurrent < m_ReadCounter)
 		{ // Processamento de todos os pacotes recebidos.
 			PacketHeader* pHeader = (PacketHeader*)&m_ReadBuffer[m_ReadCurrent];
@@ -120,7 +122,17 @@ void CSocket::ProcessPacket()
 			if (pHeader->Size > (m_ReadCounter - m_ReadCurrent))
 				break; // O pacote não foi totalmente recebido.
 
-			Process(pHeader);
+			int checksum = 0;
+
+			for (int i = offsetof(PacketHeader, Code); i < pHeader->Size; ++i)
+				checksum += ((unsigned char*)pHeader)[i];
+
+			if (checksum != pHeader->Checksum)
+				printf("CClient::ProcessPacket: Invalid checksum. checksum %d checksum %d.\n", checksum, pHeader->Checksum);
+			else if (abs(rawnow - pHeader->Timestamp) > 5)
+				printf("CClient::ProcessPacket: Delayed packet.\n");
+			else
+				Process(pHeader);
 
 			m_ReadCurrent += pHeader->Size;
 		}
@@ -148,6 +160,11 @@ void CSocket::WritePacket()
 void CSocket::SendPacket(const void* packet)
 {
 	PacketHeader* header = (PacketHeader*)packet;
+	header->Timestamp = time(0);
+	header->Checksum = 0;
+
+	for (int i = offsetof(PacketHeader, Code); i < header->Size; ++i)
+		header->Checksum += ((unsigned char*)packet)[i];
 
 	memcpy(&m_WriteBuffer[m_WriteCounter], (const unsigned char*)header, header->Size);
 	m_WriteCounter += header->Size;

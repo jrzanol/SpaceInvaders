@@ -20,7 +20,17 @@ CGame::CGame() : CEvent()
     m_IsDead = true;
     m_GameOver = true;
 
-    InitializeSocket("127.0.0.1", 8000);
+    char ipAddress[32];
+    ipAddress[0] = 0;
+
+    FILE* in = fopen("serverIp.txt", "rt");
+    if (in)
+    {
+        fgets(ipAddress, sizeof(ipAddress), in);
+        fclose(in);
+    }
+
+    InitializeSocket(ipAddress, 8000);
 }
 
 CGame::~CGame()

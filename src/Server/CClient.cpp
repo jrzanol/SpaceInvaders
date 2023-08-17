@@ -14,6 +14,8 @@ CClient::~CClient()
 
 void CClient::Initialize()
 {
+	m_State = ceState::Waiting;
+
 	m_ReadCurrent = 0;
 	m_ReadCounter = 0;
 
@@ -56,6 +58,11 @@ void CClient::SendPacket(const void* packet)
 	if (m_Sock != INVALID_SOCKET)
 	{
 		PacketHeader* header = (PacketHeader*)packet;
+		header->Timestamp = time(0);
+		header->Checksum = 0;
+
+		for (int i = offsetof(PacketHeader, Code); i < header->Size; ++i)
+			header->Checksum += ((unsigned char*)packet)[i];
 
 		int ret = send(m_Sock, (char*)header, header->Size, 0);
 		if (ret != header->Size)

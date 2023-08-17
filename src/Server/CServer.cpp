@@ -145,6 +145,8 @@ void CServer::ProcessPacket()
 	{
 		if (it.m_Sock != INVALID_SOCKET && it.m_ReadCounter > 0)
 		{
+			time_t rawnow = time(0);
+
 			while (it.m_ReadCurrent < it.m_ReadCounter)
 			{ // Processamento de todos os pacotes recebidos.
 				PacketHeader* pHeader = (PacketHeader*)&it.m_ReadBuffer[it.m_ReadCurrent];
@@ -152,7 +154,17 @@ void CServer::ProcessPacket()
 				if (pHeader->Size > (it.m_ReadCounter - it.m_ReadCurrent))
 					break; // O pacote não foi totalmente recebido.
 
-				Process(it, pHeader);
+				int checksum = 0;
+
+				for (int i = offsetof(PacketHeader, Code); i < pHeader->Size; ++i)
+					checksum += ((unsigned char*)pHeader)[i];
+
+				if (checksum != pHeader->Checksum)
+					printf("CServer::ProcessPacket: Invalid checksum. checksum %d checksum %d.\n", checksum, pHeader->Checksum);
+				else if (abs(rawnow - pHeader->Timestamp) > 5)
+					printf("CClient::ProcessPacket: Delayed packet.\n");
+				else
+					Process(it, pHeader);
 
 				it.m_ReadCurrent += pHeader->Size;
 			}
@@ -230,6 +242,7 @@ void CServer::Process(CClient& conn, PacketHeader* header)
 		if (m_Conn[connId1].CheckConnectivity())
 		{
 			ig.Header.ID = connId1;
+			ig.Header.State = m_Conn[connId1].m_State;
 
 			m_Game[gameId].m_Alive[0] = true;
 			m_Conn[connId1].SendPacket(&ig);
@@ -238,9 +251,11 @@ void CServer::Process(CClient& conn, PacketHeader* header)
 		if (m_Conn[connId2].CheckConnectivity())
 		{
 			ig.Header.ID = connId2;
+			ig.Header.State = m_Conn[connId2].m_State;
 			
 			m_Game[gameId].m_Alive[1] = true;
 			m_Conn[connId2].SendPacket(&ig);
+			m_Conn[connId2].m_State = ceState::Playing;
 		}
 
 		Log("Novo jogo gerado na sala %d, com seeder %d.", gameId, m_Game[gameId].m_Seeder);
@@ -256,6 +271,7 @@ void CServer::Process(CClient& conn, PacketHeader* header)
 			otherConnId++;
 
 		aa->Header.ID = conn.m_ConnId;
+		aa->Header.State = conn.m_State;
 		m_Conn[otherConnId].SendPacket(aa);
 	}
 	else if (header->Code == CODE_MSG_Dead)
@@ -268,6 +284,9 @@ void CServer::Process(CClient& conn, PacketHeader* header)
 			otherConnId--;
 		else
 			otherConnId++;
+
+		conn.m_State = ceState::Dead;
+		dd->Header.State = conn.m_State;
 
 		m_Game[conn.m_GameId].m_Alive[conn.m_ConnId % 2] = false;
 
@@ -290,6 +309,7 @@ void CServer::Process(CClient& conn, PacketHeader* header)
 		else
 			otherConnId++;
 
+		aa->Header.State = conn.m_State;
 		m_Conn[otherConnId].SendPacket(aa);
 		m_Conn[conn.m_ConnId].SendPacket(aa);
 	}

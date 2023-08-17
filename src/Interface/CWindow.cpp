@@ -141,10 +141,10 @@ bool CWindow::Render()
         ImGui::Text("Movimentacao: W/A/S/D");
         ImGui::Text("Tiro: Mouse");
 
-        ImGui::NewLine();
-        ImGui::Text("Desenvolvido por:");
-        ImGui::Text("Junior Zanol");
-        ImGui::Text("jrzanol.92@gmail.com");
+        //ImGui::NewLine();
+        //ImGui::Text("Desenvolvido por:");
+        //ImGui::Text("Junior Zanol");
+        //ImGui::Text("jrzanol.92@gmail.com");
 
         ImGui::NewLine();
         ImGui::Text("FPS: %u", g_FPS);

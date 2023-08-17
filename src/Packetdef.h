@@ -1,10 +1,24 @@
 #pragma once
 
+#include <ctime>
+
+enum class ceState
+{
+	Waiting = 0,
+	Playing,
+	Dead
+};
+
 struct PacketHeader
 {
 	int Size;
+	int Checksum;
+
 	int Code;
 	int ID;
+
+	ceState State;
+	time_t Timestamp;
 };
 
 const int CODE_MSG_RequestInitializeGame = 1;
